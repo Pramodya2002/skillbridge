@@ -1,5 +1,4 @@
 import React from "react";
-import { Card } from "primereact/card";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { Button } from "primereact/button";
@@ -17,7 +16,13 @@ const VolunteerTasks: React.FC = () => {
     };
 
     const actionTemplate = (row: any) => (
-        <Button label="View" severity="primary" className="p-button-sm" onClick={() => alert(`Viewing task: ${row.title}`)} />
+        <Button
+            label="View"
+            severity="secondary"
+            className="p-button-sm"
+            onClick={() => alert(`Viewing task: ${row.title}`)}
+        />
+
     );
 
     return (

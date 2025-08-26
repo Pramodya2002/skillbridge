@@ -12,6 +12,8 @@ services:
             - "8000:8000"
         depends_on:
             - mysql
+        command: php artisan serve --host=0.0.0.0 --port=8000
+
 
     react:
         build:
@@ -21,7 +23,10 @@ services:
         volumes:
             - ./frontend:/app
         ports:
-            - "3000:3000"
+            - "3000:5173"  
+        environment:
+            CHOKIDAR_USEPOLLING: "true"
+        command: yarn dev --host
 
     mysql:
         image: mysql:8

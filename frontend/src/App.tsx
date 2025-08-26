@@ -6,8 +6,12 @@ import DashboardLayout from "./components/DashboardLayout";
 import VolunteerDashboardHome from "./pages/dashboards/Volunteer/VolunteerDashboardHome";
 import VolunteerTasks from "./pages/dashboards/Volunteer/VolunteerTasks";
 import VolunteerProfile from "./pages/dashboards/Volunteer/VolunteerProfile";
-import NonprofitDashboard from './pages/dashboards/NonprofitDashboard';
 import HrDashboard from './pages/dashboards/HrDashboard';
+import NonprofitDashboardLayout from "./components/NonprofitDashboardLayout";
+import DashboardHome from "./pages/dashboards/Nonprofit/DashboardHome";
+import NonprofitTasks from "./pages/dashboards/Nonprofit/NonprofitTasks";
+import NonprofitCreateTask from "./pages/dashboards/Nonprofit/NonprofitCreateTask";
+
 import { Navigate } from 'react-router-dom';
 
 
@@ -29,7 +33,11 @@ function App() {
 
 
 
-        <Route path="/dashboard/nonprofit" element={<NonprofitDashboard />} />
+        <Route path="/dashboard/nonprofit" element={<NonprofitDashboardLayout />}>
+          <Route index element={<DashboardHome />} />
+          <Route path="tasks" element={<NonprofitTasks />} />
+          <Route path="create-task" element={<NonprofitCreateTask />} />
+        </Route>
         <Route path="/dashboard/hr" element={<HrDashboard />} />
 
         <Route path="/logout" element={<div>Logging out...</div>} />

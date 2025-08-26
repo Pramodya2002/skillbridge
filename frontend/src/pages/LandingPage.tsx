@@ -152,7 +152,8 @@ const LandingPage: React.FC = () => {
                         {['volunteer', 'nonprofit', 'hr'].map((tab) => (
                             <button
                                 key={tab}
-                                onClick={() => setActiveTab(tab)}
+                                onClick={() => setActiveTab(tab as "volunteer" | "nonprofit" | "hr")}
+
                                 className={`px-6 py-3 font-semibold border-2 rounded-t-lg mr-2 transition-colors ${activeTab === tab
                                     ? 'bg-teal-700 text-white border-teal-700'
                                     : 'text-teal-700 border-teal-700 hover:bg-teal-700 hover:text-white'
