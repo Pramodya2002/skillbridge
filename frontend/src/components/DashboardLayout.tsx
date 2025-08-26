@@ -69,9 +69,7 @@ const DashboardLayout: React.FC = () => {
                     </nav>
 
 
-                    <div className="p-4 border-t border-teal-500 text-center text-sm text-white">
-                        &copy; {new Date().getFullYear()} SkillBridge
-                    </div>
+
                 </aside>
 
                 {/* Main content */}
