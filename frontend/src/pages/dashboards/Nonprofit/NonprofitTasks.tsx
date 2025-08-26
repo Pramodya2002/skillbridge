@@ -8,6 +8,12 @@ interface Task {
     id: number;
     title: string;
     description: string;
+    location: string;
+    start_date: string;
+    end_date: string;
+    required_skills: string;
+    volunteers_needed: number;
+    status: "Open" | "Ongoing" | "Completed";
 }
 
 const NonprofitTasks: React.FC = () => {
@@ -36,9 +42,7 @@ const NonprofitTasks: React.FC = () => {
             <div className="flex justify-between items-center">
                 <div>
                     <h2 className="text-3xl font-bold text-teal-700">Tasks List</h2>
-                    <p className="text-gray-600 mt-1">
-                        View all tasks and manage them.
-                    </p>
+                    <p className="text-gray-600 mt-1">View all tasks and manage them.</p>
                 </div>
                 <Button
                     label="Create New Task"
@@ -54,11 +58,17 @@ const NonprofitTasks: React.FC = () => {
                     value={tasks}
                     stripedRows
                     scrollable
-                    tableStyle={{ minWidth: '600px' }}
+                    tableStyle={{ minWidth: '800px' }}
                     className="shadow-sm rounded-lg"
                 >
                     <Column field="title" header="Title" />
                     <Column field="description" header="Description" />
+                    <Column field="location" header="Location" />
+                    <Column field="start_date" header="Start Date" />
+                    <Column field="end_date" header="End Date" />
+                    <Column field="required_skills" header="Required Skills" />
+                    <Column field="volunteers_needed" header="Volunteers Needed" />
+                    <Column field="status" header="Status" />
                     <Column header="Actions" body={actionBodyTemplate} />
                 </DataTable>
             </div>

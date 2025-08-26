@@ -11,6 +11,8 @@ import NonprofitDashboardLayout from "./components/NonprofitDashboardLayout";
 import DashboardHome from "./pages/dashboards/Nonprofit/DashboardHome";
 import NonprofitTasks from "./pages/dashboards/Nonprofit/NonprofitTasks";
 import NonprofitCreateTask from "./pages/dashboards/Nonprofit/NonprofitCreateTask";
+import NonprofitProfile from "./pages/dashboards/Nonprofit/Profile";
+
 
 import { Navigate } from 'react-router-dom';
 
@@ -37,6 +39,7 @@ function App() {
           <Route index element={<DashboardHome />} />
           <Route path="tasks" element={<NonprofitTasks />} />
           <Route path="create-task" element={<NonprofitCreateTask />} />
+          <Route path="/dashboard/nonprofit/profile" element={<NonprofitProfile />} />
         </Route>
         <Route path="/dashboard/hr" element={<HrDashboard />} />
 
