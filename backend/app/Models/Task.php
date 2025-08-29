@@ -17,4 +17,14 @@ class Task extends Model
         'status',
     ];
 
+    protected $casts = [
+    'required_skills' => 'array',
+    ];
+
+    public function volunteers()
+    {
+        return $this->belongsToMany(User::class, 'task_user', 'task_id', 'user_id');
+    }
+
+    
 }

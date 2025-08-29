@@ -10,8 +10,11 @@ import HrDashboard from './pages/dashboards/HrDashboard';
 import NonprofitDashboardLayout from "./components/NonprofitDashboardLayout";
 import DashboardHome from "./pages/dashboards/Nonprofit/DashboardHome";
 import NonprofitTasks from "./pages/dashboards/Nonprofit/NonprofitTasks";
+import NonprofitViewTask from './pages/dashboards/Nonprofit/NonprofitViewTask';
 import NonprofitCreateTask from "./pages/dashboards/Nonprofit/NonprofitCreateTask";
 import NonprofitProfile from "./pages/dashboards/Nonprofit/Profile";
+import VolunteerViewTask from './pages/dashboards/Volunteer/VolunteerViewTask';
+
 
 
 import { Navigate } from 'react-router-dom';
@@ -30,6 +33,7 @@ function App() {
           <Route index element={<VolunteerDashboardHome />} />
           <Route path="tasks" element={<VolunteerTasks />} />
           <Route path="profile" element={<VolunteerProfile />} />
+          <Route path="/dashboard/volunteer/tasks/:id" element={<VolunteerViewTask />} />
         </Route>
         <Route path="/volunteer/dashboard" element={<Navigate to="/dashboard/volunteer" replace />} />
 
@@ -40,6 +44,7 @@ function App() {
           <Route path="tasks" element={<NonprofitTasks />} />
           <Route path="create-task" element={<NonprofitCreateTask />} />
           <Route path="/dashboard/nonprofit/profile" element={<NonprofitProfile />} />
+          <Route path="/dashboard/nonprofit/tasks/:id" element={<NonprofitViewTask />} />
         </Route>
         <Route path="/dashboard/hr" element={<HrDashboard />} />
 
