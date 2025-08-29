@@ -30,11 +30,12 @@ const NonprofitTasks: React.FC = () => {
     const actionBodyTemplate = (row: Task) => (
         <button
             className="bg-teal-500 hover:bg-teal-600 text-white py-1 px-3 rounded flex items-center gap-1 transition duration-200"
-            onClick={() => alert(`Viewing task: ${row.title}`)}
+            onClick={() => navigate(`/dashboard/nonprofit/tasks/${row.id}`)}
         >
             <i className="pi pi-eye"></i> View
         </button>
     );
+
 
     return (
         <div className="space-y-8">

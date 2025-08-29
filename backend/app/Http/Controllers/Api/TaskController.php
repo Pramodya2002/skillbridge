@@ -21,7 +21,7 @@ class TaskController extends Controller
             'location' => 'nullable|string|max:255',
             'start_date' => 'nullable|date',
             'end_date' => 'nullable|date',
-            'required_skills' => 'nullable|string|max:255',
+            'required_skills' => 'nullable|array', 
             'volunteers_needed' => 'nullable|integer|min:1',
             'status' => 'nullable|in:Open,Ongoing,Completed',
         ]);
@@ -37,6 +37,37 @@ class TaskController extends Controller
             'status',
         ]));
 
+
         return response()->json($task, 201);
     }
+
+    public function show($id)
+    {
+        $task = Task::find($id);
+
+        if (!$task) {
+            return response()->json(['error' => 'Task not found'], 404);
+        }
+
+        return response()->json($task);
+    }
+
+    public function apply(Request $request, $id)
+    {
+        $request->validate([
+            'user_id' => 'required|integer|exists:users,id',
+        ]);
+
+        $task = Task::find($id);
+
+        if (!$task) {
+            return response()->json(['error' => 'Task not found'], 404);
+        }
+        
+        $task->volunteers()->syncWithoutDetaching([$request->user_id]);
+
+        return response()->json(['message' => 'Applied successfully'], 200);
+    }
+
+
 }

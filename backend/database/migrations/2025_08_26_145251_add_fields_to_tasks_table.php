@@ -10,7 +10,7 @@ return new class extends Migration {
             $table->string('location')->nullable();
             $table->date('start_date')->nullable();
             $table->date('end_date')->nullable();
-            $table->string('required_skills')->nullable();
+            $table->json('required_skills')->nullable();
             $table->integer('volunteers_needed')->default(1);
             $table->enum('status', ['Open', 'Ongoing', 'Completed'])->default('Open');
         });

@@ -82,7 +82,7 @@ const Register: React.FC = () => {
             payload.skills = selectedSkills.map(s => s.value);
             payload.causes = selectedCauses.map(c => c.value);
             payload.availability = (document.getElementById('availability') as HTMLSelectElement)?.value;
-            payload.experience = (document.getElementById('experience') as HTMLSelectElement)?.value;
+            payload.experience_level = (document.getElementById('experience') as HTMLSelectElement)?.value;
             payload.portfolio = (document.getElementById('portfolio') as HTMLInputElement)?.value;
         }
 

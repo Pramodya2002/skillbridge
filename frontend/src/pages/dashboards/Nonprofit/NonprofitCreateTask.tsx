@@ -3,7 +3,18 @@ import { InputText } from "primereact/inputtext";
 import { Button } from "primereact/button";
 import { Calendar } from "primereact/calendar";
 import { Dropdown } from "primereact/dropdown";
+import Select from "react-select";
 import { useNavigate } from "react-router-dom";
+
+type OptionType = { value: string; label: string };
+
+const skillOptions: OptionType[] = [
+    { value: "graphic-design", label: "Graphic Design" },
+    { value: "web-development", label: "Web Development" },
+    { value: "content-writing", label: "Content Writing" },
+    { value: "data-analysis", label: "Data Analysis" },
+    { value: "marketing", label: "Marketing" },
+];
 
 const NonprofitCreateTask: React.FC = () => {
     const [title, setTitle] = useState("");
@@ -11,7 +22,7 @@ const NonprofitCreateTask: React.FC = () => {
     const [location, setLocation] = useState("");
     const [startDate, setStartDate] = useState<Date | null>(null);
     const [endDate, setEndDate] = useState<Date | null>(null);
-    const [skills, setSkills] = useState("");
+    const [requiredSkills, setRequiredSkills] = useState<OptionType[]>([]);
     const [volunteersNeeded, setVolunteersNeeded] = useState<number | null>(null);
     const [status, setStatus] = useState("Open");
 
@@ -32,7 +43,7 @@ const NonprofitCreateTask: React.FC = () => {
             location,
             start_date: startDate ? startDate.toISOString().split('T')[0] : null,
             end_date: endDate ? endDate.toISOString().split('T')[0] : null,
-            required_skills: skills,
+            required_skills: requiredSkills.map((s) => s.value),
             volunteers_needed: volunteersNeeded,
             status,
         };
@@ -109,10 +120,13 @@ const NonprofitCreateTask: React.FC = () => {
 
                     <div className="flex flex-col">
                         <label className="mb-1 font-semibold">Required Skills</label>
-                        <InputText
-                            value={skills}
-                            onChange={(e) => setSkills(e.target.value)}
-                            className="w-full border border-gray-300 rounded px-3 py-2 focus:border-teal-500 focus:ring focus:ring-teal-200"
+                        <Select
+                            isMulti
+                            options={skillOptions}
+                            value={requiredSkills}
+                            onChange={(val) => setRequiredSkills(val as OptionType[])}
+                            classNamePrefix="react-select"
+                            placeholder="Select required skills"
                         />
                     </div>
 

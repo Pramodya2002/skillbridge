@@ -1,17 +1,31 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Card } from "primereact/card";
 import { Button } from "primereact/button";
 import { ProgressBar } from "primereact/progressbar";
 import { Tag } from "primereact/tag";
+import { useNavigate } from "react-router-dom";
+
+
+
+interface Task {
+    id: number;
+    title: string;
+    description: string;
+    location: string;
+    start_date: string;
+    end_date: string;
+    required_skills: string;
+    volunteers_needed: number;
+    status: string;
+}
+
+
 
 const VolunteerDashboardHome: React.FC = () => {
+    const navigate = useNavigate();
     const user = JSON.parse(localStorage.getItem("user") || "{}");
 
     const stats = { points: 2450, level: 7, tasksCompleted: 34, badgesEarned: 12 };
-    const matchedTasks = [
-        { id: 1, title: "Community Garden Setup", desc: "Help set up raised beds for local families.", match: 95, time: "4 hours", location: "Downtown" },
-        { id: 2, title: "Youth Coding Workshop", desc: "Teach programming to middle school students.", match: 88, time: "3 hours", location: "Tech Center" },
-    ];
     const badges = [{ id: 1, name: "Green Thumb" }, { id: 2, name: "Team Player" }, { id: 3, name: "Mentor" }];
     const skillsProgress = [
         { skill: "Leadership", value: 85 },
@@ -23,6 +37,31 @@ const VolunteerDashboardHome: React.FC = () => {
         { id: 1, task: "Food Bank Sorting", desc: "Organized donations for weekend distribution.", date: "Jan 15, 2025", feedback: "Sarah was efficient!" },
         { id: 2, task: "Senior Center Visit", desc: "Spent time reading with residents.", date: "Jan 12, 2025", feedback: "The residents loved Sarah!" },
     ];
+
+    const [tasks, setTasks] = useState<Task[]>([]);
+
+    useEffect(() => {
+        fetch("http://localhost:8000/api/tasks")
+            .then(res => res.json())
+            .then(data => setTasks(data))
+            .catch(err => console.error("Error fetching tasks:", err));
+    }, []);
+
+    const handleApply = async (taskId: number) => {
+        try {
+            const response = await fetch(`http://localhost:8000/api/tasks/${taskId}/apply`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ user_id: user.id }),
+            });
+
+            if (!response.ok) throw new Error("Failed to apply");
+
+            alert("You have successfully applied for this task!");
+        } catch (error) {
+            console.error("Error applying for task:", error);
+        }
+    };
 
     return (
         <div className="space-y-8">
@@ -54,23 +93,35 @@ const VolunteerDashboardHome: React.FC = () => {
 
             {/* Main Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Matched Tasks */}
-                <Card title="Matched Tasks" className="shadow-xl rounded-xl border-0">
-                    {matchedTasks.map((task) => (
-                        <div key={task.id} className="p-4 mb-4 rounded-xl bg-white shadow hover:shadow-lg transform hover:-translate-y-1 transition-all">
-                            <div className="flex justify-between items-center mb-2">
-                                <h3 className="font-semibold text-teal-700 text-lg">{task.title}</h3>
-                                <Tag value={`${task.match}% Match`} severity="success" className="font-bold text-sm" />
+                {/* Available Tasks from Nonprofits */}
+                <Card title="Available Tasks" className="shadow-xl rounded-xl border-0">
+                    {tasks.length === 0 ? (
+                        <p className="text-gray-500">No tasks available right now.</p>
+                    ) : (
+                        tasks.map((task) => (
+                            <div key={task.id} className="p-4 mb-4 rounded-xl bg-white shadow hover:shadow-lg transition-all">
+                                <div className="flex justify-between items-center mb-2">
+                                    <h3 className="font-semibold text-teal-700 text-lg">{task.title}</h3>
+                                    <Tag value={task.status} severity={task.status === "Open" ? "success" : task.status === "Ongoing" ? "info" : "danger"} />
+                                </div>
+                                <p className="text-gray-600">{task.description}</p>
+                                <div className="flex flex-wrap text-sm text-gray-500 mt-2 gap-4">
+                                    <span>📍 {task.location}</span>
+                                    <span>📅 {task.start_date} → {task.end_date}</span>
+                                    <span>👥 {task.volunteers_needed} needed</span>
+                                    <span>🛠 {task.required_skills}</span>
+                                </div>
+                                <Button
+                                    label="Apply"
+                                    className="mt-3 bg-teal-600 hover:bg-teal-700 text-white font-bold px-6 py-2 rounded-lg shadow-lg transition duration-200 transform hover:-translate-y-0.5"
+                                    onClick={() => navigate(`/dashboard/volunteer/tasks/${task.id}`)}
+                                />
+
                             </div>
-                            <p className="text-gray-600">{task.desc}</p>
-                            <div className="flex justify-between text-sm text-gray-500 mt-2">
-                                <span>⏱ {task.time}</span>
-                                <span>📍 {task.location}</span>
-                            </div>
-                            <Button label="Apply" className="mt-3 bg-teal-500 hover:bg-teal-600 text-white font-bold" />
-                        </div>
-                    ))}
+                        ))
+                    )}
                 </Card>
+
 
                 {/* Badges */}
                 <Card title="Badges & Achievements" className="shadow-xl rounded-xl border-0">

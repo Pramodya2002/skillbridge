@@ -14,3 +14,6 @@ Route::post('/logout', [LoginController::class, 'logout']);
 
 Route::get('/tasks', [TaskController::class, 'index']);
 Route::post('/tasks', [TaskController::class, 'store']);
+Route::get('/tasks/{id}', [App\Http\Controllers\Api\TaskController::class, 'show']);
+Route::post('/tasks/{id}/apply', [App\Http\Controllers\Api\TaskController::class, 'apply']);
+
