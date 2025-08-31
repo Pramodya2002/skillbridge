@@ -18,7 +18,9 @@ class Task extends Model
     ];
 
     protected $casts = [
-    'required_skills' => 'array',
+        'required_skills' => 'array',
+        'start_date' => 'date',
+        'end_date' => 'date',
     ];
 
     public function volunteers()
