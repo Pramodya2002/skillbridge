@@ -1,12 +1,15 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import Select from 'react-select';
 import type { MultiValue } from 'react-select';
+import { Toast } from 'primereact/toast';
+
 
 
 type OptionType = { value: string; label: string };
+
 
 const skillOptions: OptionType[] = [
     { value: 'graphic-design', label: 'Graphic Design' },
@@ -26,6 +29,8 @@ const causeOptions: OptionType[] = [
 
 const Register: React.FC = () => {
     const location = useLocation();
+    const navigate = useNavigate();
+    const toast = useRef<Toast>(null);
     const queryParams = new URLSearchParams(location.search);
     const roleFromQuery = queryParams.get('role') as 'volunteer' | 'nonprofit' | 'hr';
 
@@ -111,7 +116,15 @@ const Register: React.FC = () => {
             });
 
             if (res.ok) {
-                alert('Registration successful!');
+                toast.current?.show({
+                    severity: 'success',
+                    summary: 'Success',
+                    detail: 'Registration completed successfully!',
+                    life: 3000,
+                    closable: true,
+                    style: { backgroundColor: '#1abc9c', color: '#fff', fontSize: '16px', borderRadius: '8px' }
+                });
+
                 setFormData({
                     volunteer: { name: '', email: '', password: '', confirmPassword: '' },
                     nonprofit: { name: '', email: '', password: '', confirmPassword: '' },
@@ -128,6 +141,9 @@ const Register: React.FC = () => {
                     const el = document.getElementById(id) as HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement;
                     if (el) el.value = '';
                 });
+
+                setTimeout(() => navigate('/login'), 1500);
+
 
             } else {
                 const errText = await res.text();
@@ -259,6 +275,7 @@ const Register: React.FC = () => {
 
     return (
         <div className="min-h-screen flex flex-col bg-gradient-to-br from-teal-100 to-green-50">
+            <Toast ref={toast} position="top-right" />
             <Header />
             <div className="max-w-2xl w-full mx-auto my-12 p-10 bg-white rounded-2xl shadow-lg flex-grow animate-fadeIn">
                 <h2 className="text-3xl font-bold text-teal-700 mb-8 text-center">

@@ -30,20 +30,28 @@ const VolunteerViewTask: React.FC = () => {
 
     const handleApply = async () => {
         try {
-            const response = await fetch(`http://localhost:8000/api/tasks/${id}/apply`, {
+            const response = await fetch("http://localhost:8000/api/task-applications", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ user_id: user.id }),
+                body: JSON.stringify({
+                    volunteer_id: user.volunteer_id || user.id,
+                    task_id: task?.id
+                }),
             });
 
-            if (!response.ok) throw new Error("Failed to apply");
+            if (!response.ok) {
+                const err = await response.json();
+                throw new Error(err.message || "Failed to apply");
+            }
 
             alert("You have successfully applied for this task!");
             navigate("/dashboard/volunteer");
         } catch (error) {
             console.error("Error applying for task:", error);
+            alert("Error: " + error);
         }
     };
+
 
     if (!task) return <div className="p-6 text-center">Loading task details...</div>;
 
