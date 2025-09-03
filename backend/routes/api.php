@@ -26,3 +26,5 @@ Route::post('/task-applications', [TaskApplicationController::class, 'store']);
 
 
 Route::get('/volunteers/{id}/matched-tasks', [VolunteerController::class, 'matchedTasks']);
+Route::get('/volunteers/{id}/tasks', [TaskApplicationController::class, 'myTasks']);
+

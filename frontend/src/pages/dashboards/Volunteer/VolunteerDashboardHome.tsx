@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { Card } from "primereact/card";
 import { Button } from "primereact/button";
-import { ProgressBar } from "primereact/progressbar";
 import { Tag } from "primereact/tag";
+import { Calendar } from "primereact/calendar";
+import { Dropdown } from "primereact/dropdown";
 import { useNavigate } from "react-router-dom";
-
 
 interface Task {
     id: number;
@@ -18,160 +18,229 @@ interface Task {
 
 type Match = { task: Task; score: number };
 
-
 const VolunteerMatches: React.FC = () => {
     const user = JSON.parse(localStorage.getItem("user") || "{}");
     const volunteerId = user?.volunteer_id || user?.id;
+
     const [matches, setMatches] = useState<Match[]>([]);
     const [loading, setLoading] = useState(true);
-    const navigate = useNavigate();
 
+    const navigate = useNavigate();
+    const formatDate = (dateStr: string) => dateStr?.slice(0, 10);
 
     useEffect(() => {
         if (!volunteerId) return;
-        setLoading(true);
-        fetch(`http://localhost:8000/api/volunteers/${volunteerId}/matched-tasks`)
-            .then((res) => res.json())
-            .then((data) => setMatches(data))
-            .catch((err) => console.error(err))
+
+        Promise.all([
+            fetch(`http://localhost:8000/api/volunteers/${volunteerId}/matched-tasks`).then(res => res.json()),
+            fetch(`http://localhost:8000/api/volunteers/${volunteerId}/tasks`).then(res => res.json()),
+            fetch(`http://localhost:8000/api/tasks`).then(res => res.json()),
+        ])
+            .then(([matches, applied]) => {
+                const appliedTaskIds = applied.map((a: any) => a.task.id);
+                setMatches(matches.filter((m: any) => !appliedTaskIds.includes(m.task.id)));
+            })
+            .catch(console.error)
             .finally(() => setLoading(false));
     }, [volunteerId]);
-
 
     if (!volunteerId) return <div>Please login as a volunteer to see matches.</div>;
 
     return (
-        <Card title="Recommended Tasks" className="shadow-xl rounded-xl border-0">
+        <div className="p-6 mb-8 space-y-10">
+            <h2 className="text-2xl font-extrabold text-teal-700 mb-4">🔹 Your Matched Tasks</h2>
             {loading ? (
                 <p>Loading...</p>
             ) : matches.length === 0 ? (
-                <p className="text-gray-500">No matches found.</p>
+                <p className="text-gray-500">No matched tasks found.</p>
             ) : (
                 matches.map((m) => (
-                    <div
-                        key={m.task.id}
-                        className="p-4 mb-4 rounded-xl bg-white shadow hover:shadow-lg transition-all"
-                    >
-                        <div className="flex justify-between items-center mb-2">
-                            <h3 className="font-semibold text-teal-700 text-lg">
-                                {m.task.title}{" "}
-                                <span className="ml-2 text-sm text-gray-500">({m.score}%)</span>
-                            </h3>
-                            <Tag value="Matched" severity="success" />
+                    <Card key={m.task.id} className="p-6 mb-6 rounded-2xl shadow-2xl bg-white">
+                        <div className="flex justify-between items-center mb-3">
+                            <h3 className="font-extrabold text-2xl text-teal-700">{m.task.title}</h3>
+                            <Tag
+                                value={`Matched ${m.score}%`}
+                                className="text-lg font-bold px-4 py-2 rounded-full shadow-md bg-gradient-to-r from-teal-400 to-green-500 text-white"
+                            />
                         </div>
-                        <p className="text-gray-600">{m.task.description}</p>
-                        <div className="flex flex-wrap text-sm text-gray-500 mt-2 gap-4">
-                            {m.task.location && <span>📍 {m.task.location}</span>}
-                            {m.task.start_date && m.task.end_date && (
-                                <span>
-                                    📅 {m.task.start_date} → {m.task.end_date}
+                        <p className="text-gray-700 text-lg mb-3">{m.task.description}</p>
+                        <div className="flex flex-wrap gap-4 text-md font-semibold">
+                            {m.task.location && (
+                                <span className="bg-teal-100 px-3 py-1 rounded-lg text-teal-700">
+                                    📍 {m.task.location}
                                 </span>
                             )}
-                            {m.task.required_skills?.length ? (
-                                <span>🛠 {m.task.required_skills.join(", ")}</span>
-                            ) : null}
+                            {m.task.start_date && m.task.end_date && (
+                                <span className="bg-yellow-100 px-3 py-1 rounded-lg text-yellow-700">
+                                    📅 {formatDate(m.task.start_date)} → {formatDate(m.task.end_date)}
+                                </span>
+                            )}
+                            {m.task.required_skills?.length && (
+                                <span className="bg-purple-100 px-3 py-1 rounded-lg text-purple-700">
+                                    🛠 {m.task.required_skills.join(", ")}
+                                </span>
+                            )}
                         </div>
                         <Button
-                            label="Apply"
-                            className="mt-3 bg-teal-600 hover:bg-teal-700 text-white font-bold px-6 py-2 rounded-lg shadow-lg transition duration-200"
+                            label="View"
+                            className="mt-4 bg-teal-600 hover:bg-teal-700 text-white px-6 py-3 rounded-lg shadow"
                             onClick={() => navigate(`/dashboard/volunteer/tasks/${m.task.id}`)}
                         />
-
-                    </div>
+                    </Card>
                 ))
             )}
-        </Card>
+        </div>
     );
 };
 
 const VolunteerDashboardHome: React.FC = () => {
     const user = JSON.parse(localStorage.getItem("user") || "{}");
+    const volunteerId = user?.volunteer_id || user?.id;
+    const navigate = useNavigate();
 
-    const stats = { points: 2450, level: 7, tasksCompleted: 34, badgesEarned: 12 };
-    const badges = [{ id: 1, name: "Green Thumb" }, { id: 2, name: "Team Player" }, { id: 3, name: "Mentor" }];
-    const skillsProgress = [
-        { skill: "Leadership", value: 85 },
-        { skill: "Communication", value: 92 },
-        { skill: "Problem Solving", value: 78 },
-        { skill: "Teamwork", value: 90 },
-    ];
-    const recentCompletions = [
-        { id: 1, task: "Food Bank Sorting", desc: "Organized donations for weekend distribution.", date: "Jan 15, 2025", feedback: "Sarah was efficient!" },
-        { id: 2, task: "Senior Center Visit", desc: "Spent time reading with residents.", date: "Jan 12, 2025", feedback: "The residents loved Sarah!" },
-    ];
+    const [allTasks, setAllTasks] = useState<Task[]>([]);
+    const [appliedTaskIds, setAppliedTaskIds] = useState<number[]>([]);
+    const [searchTitle, setSearchTitle] = useState("");
+    const [searchLocation, setSearchLocation] = useState("");
+    const [searchSkill, setSearchSkill] = useState("");
+    const [startDate, setStartDate] = useState<Date | null>(null);
+    const [endDate, setEndDate] = useState<Date | null>(null);
+
+    useEffect(() => {
+        if (!volunteerId) return;
+
+        // fetch all tasks
+        fetch("http://localhost:8000/api/tasks")
+            .then(res => res.json())
+            .then(data => setAllTasks(data))
+            .catch(console.error);
+
+        // fetch applied tasks for this volunteer
+        fetch(`http://localhost:8000/api/volunteers/${volunteerId}/applied-tasks`)
+            .then(res => res.json())
+            .then((applied: any[]) => {
+                setAppliedTaskIds(applied.map(a => a.task_id));
+            })
+            .catch(console.error);
+    }, [volunteerId]);
 
 
+    const formatDate = (dateStr: string) => dateStr?.slice(0, 10);
+
+    const titles = Array.from(new Set(allTasks.map(t => t.title))).map(title => ({ label: title, value: title }));
+    const locations = Array.from(new Set(allTasks.map(t => t.location))).map(loc => ({ label: loc, value: loc }));
+    const skills = Array.from(new Set(allTasks.flatMap(t => t.required_skills || []))).map(skill => ({ label: skill, value: skill }));
+
+    const filteredTasks = allTasks.filter(task => !appliedTaskIds.includes(task.id))
+        .filter((task) => {
+            const matchTitle = searchTitle ? task.title === searchTitle : true;
+            const matchLocation = searchLocation ? task.location === searchLocation : true;
+            const matchSkill = searchSkill ? task.required_skills?.includes(searchSkill) : true;
+
+            const matchStart = startDate ? new Date(task.start_date) >= startDate : true;
+            const matchEnd = endDate ? new Date(task.end_date) <= endDate : true;
+
+            return matchTitle && matchLocation && matchSkill && matchStart && matchEnd;
+        });
 
 
 
     return (
-        <div className="space-y-8">
-            {/* Welcome */}
+        <div className="space-y-8 p-6">
             <div className="text-center mb-8">
                 <h2 className="text-3xl font-extrabold text-teal-600">Welcome back, {user.name || "Volunteer"}!</h2>
                 <p className="text-gray-600 text-lg mt-2">Ready to make a difference today?</p>
             </div>
 
-            {/* Stats */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
-                <Card className="p-6 bg-gradient-to-r from-teal-100 to-teal-200 shadow-lg hover:shadow-2xl transform hover:-translate-y-1 transition-all rounded-xl text-center">
-                    <h3 className="text-gray-700 font-semibold mb-2">Total Points</h3>
-                    <p className="text-3xl font-bold text-teal-700">{stats.points}</p>
-                </Card>
-                <Card className="p-6 bg-gradient-to-r from-green-100 to-green-200 shadow-lg hover:shadow-2xl transform hover:-translate-y-1 transition-all rounded-xl text-center">
-                    <h3 className="text-gray-700 font-semibold mb-2">Current Level</h3>
-                    <p className="text-3xl font-bold text-green-700">Level {stats.level}</p>
-                </Card>
-                <Card className="p-6 bg-gradient-to-r from-yellow-100 to-yellow-200 shadow-lg hover:shadow-2xl transform hover:-translate-y-1 transition-all rounded-xl text-center">
-                    <h3 className="text-gray-700 font-semibold mb-2">Tasks Completed</h3>
-                    <p className="text-3xl font-bold text-yellow-700">{stats.tasksCompleted}</p>
-                </Card>
-                <Card className="p-6 bg-gradient-to-r from-purple-100 to-purple-200 shadow-lg hover:shadow-2xl transform hover:-translate-y-1 transition-all rounded-xl text-center">
-                    <h3 className="text-gray-700 font-semibold mb-2">Badges Earned</h3>
-                    <p className="text-3xl font-bold text-purple-700">{stats.badgesEarned}</p>
-                </Card>
-            </div>
+            <VolunteerMatches />
 
-            {/* Main Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Matched Tasks (Rule-based) */}
-                <VolunteerMatches />
+            {/* Browse All Tasks with Filters */}
+            <div>
+                <h2 className="text-2xl font-extrabold text-teal-700 mb-4">📂 Browse All Tasks</h2>
+
+                <div className="flex flex-wrap gap-4 mb-6">
+                    <Dropdown
+                        value={searchTitle}
+                        options={titles}
+                        onChange={(e) => setSearchTitle(e.value)}
+                        placeholder="Select Title"
+                        className="w-full md:w-1/4 border border-gray-300 rounded-lg bg-white p-2 shadow-sm"
+                        panelClassName="bg-white shadow-lg"
+                        showClear
+                    />
+                    <Dropdown
+                        value={searchLocation}
+                        options={locations}
+                        onChange={(e) => setSearchLocation(e.value)}
+                        placeholder="Select Location"
+                        className="w-full md:w-1/4 border border-gray-300 rounded-lg bg-white p-2 shadow-sm"
+                        panelClassName="bg-white shadow-lg"
+                        showClear
+                    />
+                    <Dropdown
+                        value={searchSkill}
+                        options={skills}
+                        onChange={(e) => setSearchSkill(e.value)}
+                        placeholder="Select Skill"
+                        className="w-full md:w-1/4 border border-gray-300 rounded-lg bg-white p-2 shadow-sm"
+                        panelClassName="bg-white shadow-lg"
+                        showClear
+                    />
+                    <Calendar
+                        placeholder="Start Date"
+                        value={startDate}
+                        onChange={(e) => setStartDate(e.value as Date | null)}
+                        showIcon
+                        showButtonBar
+                        className="w-full md:w-1/6 border border-gray-300 rounded-lg bg-white p-2 shadow-sm"
+                        inputClassName="bg-white"
+                        panelClassName="bg-white shadow-lg"
+                    />
+                    <Calendar
+                        placeholder="End Date"
+                        value={endDate}
+                        onChange={(e) => setEndDate(e.value as Date | null)}
+                        showIcon
+                        showButtonBar
+                        className="w-full md:w-1/6 border border-gray-300 rounded-lg bg-white p-2 shadow-sm"
+                        inputClassName="bg-white"
+                        panelClassName="bg-white shadow-lg"
+                    />
+                </div>
 
 
-                {/* Badges */}
-                <Card title="Badges & Achievements" className="shadow-xl rounded-xl border-0">
-                    <div className="flex gap-4 mb-4 flex-wrap">
-                        {badges.map((b) => (
-                            <div key={b.id} className="px-4 py-2 bg-gradient-to-r from-purple-100 to-purple-200 rounded-full text-purple-700 font-semibold shadow hover:shadow-md transition-all">
-                                {b.name}
+                {filteredTasks.length === 0 ? (
+                    <p className="text-gray-500">No tasks found.</p>
+                ) : (
+                    filteredTasks.map((t) => (
+                        <Card key={t.id} className="p-6 mb-6 rounded-2xl shadow-2xl bg-white">
+                            <h3 className="font-extrabold text-2xl text-teal-700 mb-2">{t.title}</h3>
+                            <p className="text-gray-700 text-lg mb-3">{t.description}</p>
+                            <div className="flex flex-wrap gap-4 text-md font-semibold">
+                                {t.location && (
+                                    <span className="bg-teal-100 px-3 py-1 rounded-lg text-teal-700">
+                                        📍 {t.location}
+                                    </span>
+                                )}
+                                {t.start_date && t.end_date && (
+                                    <span className="bg-yellow-100 px-3 py-1 rounded-lg text-yellow-700">
+                                        📅 {formatDate(t.start_date)} → {formatDate(t.end_date)}
+                                    </span>
+                                )}
+                                {t.required_skills?.length && (
+                                    <span className="bg-purple-100 px-3 py-1 rounded-lg text-purple-700">
+                                        🛠 {t.required_skills.join(", ")}
+                                    </span>
+                                )}
                             </div>
-                        ))}
-                    </div>
-                    <p className="text-gray-600 mb-2">550 XP until next level</p>
-                    <ProgressBar value={55} showValue={false} className="h-3 rounded-full bg-teal-100" style={{ backgroundColor: '#E0F7FA' }}></ProgressBar>
-                </Card>
-
-                {/* Skills */}
-                <Card title="Skills Progress" className="shadow-xl rounded-xl border-0">
-                    {skillsProgress.map((s, i) => (
-                        <div key={i} className="mb-4">
-                            <div className="flex justify-between mb-1 font-semibold text-gray-700">{s.skill} <span>{s.value}%</span></div>
-                            <ProgressBar value={s.value} showValue={false} className="h-3 rounded-full bg-gradient-to-r from-teal-400 to-teal-600 shadow-inner"></ProgressBar>
-                        </div>
-                    ))}
-                </Card>
-
-                {/* Recent Completions */}
-                <Card title="Recent Completions" className="shadow-xl rounded-xl border-0">
-                    {recentCompletions.map((c) => (
-                        <div key={c.id} className="p-4 mb-3 rounded-xl bg-white shadow hover:shadow-lg transform hover:-translate-y-1 transition-all">
-                            <h3 className="font-semibold text-teal-700">{c.task}</h3>
-                            <p className="text-gray-600">{c.desc}</p>
-                            <p className="text-xs text-gray-500 mt-1">{c.date}</p>
-                            <p className="italic text-gray-500 mt-1">“{c.feedback}”</p>
-                        </div>
-                    ))}
-                </Card>
+                            <Button
+                                label="View"
+                                className="mt-4 bg-teal-600 hover:bg-teal-700 text-white px-6 py-3 rounded-lg shadow"
+                                onClick={() => navigate(`/dashboard/volunteer/tasks/${t.id}`)}
+                            />
+                        </Card>
+                    ))
+                )}
             </div>
         </div>
     );

@@ -10,8 +10,11 @@ class TaskController extends Controller
 {
     public function index()
     {
-        return Task::all();
+        $tasks = Task::withCount('applications')->get();
+
+        return response()->json($tasks);
     }
+
 
     public function store(Request $request)
     {
@@ -43,7 +46,7 @@ class TaskController extends Controller
 
     public function show($id)
     {
-        $task = Task::find($id);
+        $task = Task::withCount('applications')->find($id);
 
         if (!$task) {
             return response()->json(['error' => 'Task not found'], 404);
@@ -65,6 +68,11 @@ class TaskController extends Controller
         }
         
         $task->volunteers()->syncWithoutDetaching([$request->user_id]);
+
+        if ($task->status === 'Open') {
+            $task->status = 'Ongoing';
+            $task->save();
+        }
 
         return response()->json(['message' => 'Applied successfully'], 200);
     }
