@@ -20,6 +20,7 @@ const VolunteerViewTask: React.FC = () => {
     const [task, setTask] = useState<Task | null>(null);
     const navigate = useNavigate();
     const user = JSON.parse(localStorage.getItem("user") || "{}");
+    const formatDate = (dateStr: string) => dateStr?.slice(0, 10);
 
     useEffect(() => {
         fetch(`http://localhost:8000/api/tasks/${id}`)
@@ -52,31 +53,48 @@ const VolunteerViewTask: React.FC = () => {
         }
     };
 
-
-    if (!task) return <div className="p-6 text-center">Loading task details...</div>;
+    if (!task) return <div className="p-6 text-center text-lg font-semibold">Loading task details...</div>;
 
     return (
-        <div className="p-6 max-w-3xl mx-auto bg-white rounded-xl shadow-lg space-y-6">
-            <h2 className="text-3xl font-bold text-teal-700">{task.title}</h2>
-            <Tag value={task.status} severity={task.status === "Open" ? "success" : task.status === "Ongoing" ? "info" : "danger"} />
-            <p><strong>Description:</strong> {task.description}</p>
-            <p><strong>Location:</strong> {task.location}</p>
-            <p><strong>Start Date:</strong> {task.start_date}</p>
-            <p><strong>End Date:</strong> {task.end_date}</p>
-            <p><strong>Required Skills:</strong> {task.required_skills.join(", ")}</p>
-            <p><strong>Volunteers Needed:</strong> {task.volunteers_needed}</p>
+        <div className=" flex items-center justify-center ">
+            {/* Single Task Card */}
+            <div className="w-full max-w-3xl bg-white rounded-3xl shadow-2xl p-10 space-y-6">
+                <div className="flex justify-between items-center">
+                    <h2 className="text-3xl font-bold text-teal-700">{task.title}</h2>
+                    <Tag
+                        value={task.status}
+                        severity={
+                            task.status === "Open"
+                                ? "success"
+                                : task.status === "Ongoing"
+                                    ? "info"
+                                    : "danger"
+                        }
+                        className="text-lg font-bold px-5 py-2 rounded-full shadow-md"
+                    />
+                </div>
 
-            <div className="flex gap-4 mt-4">
-                <Button
-                    label="Confirm Apply"
-                    className="bg-teal-600 hover:bg-teal-700 text-white font-bold px-6 py-2 rounded-lg shadow-lg transition duration-200"
-                    onClick={handleApply}
-                />
-                <Button
-                    label="Back"
-                    className="bg-gray-400 hover:bg-gray-500 text-white px-6 py-2 rounded-lg shadow transition duration-200"
-                    onClick={() => navigate("/dashboard/volunteer")}
-                />
+
+                <div className="text-lg space-y-4 mt-4">
+                    <p><strong className="text-teal-700">Description:</strong> {task.description}</p>
+                    <p><strong className="text-teal-700">Location:</strong> {task.location}</p>
+                    <p><strong className="text-teal-700">Task Period:</strong> {formatDate(task.start_date)} → {formatDate(task.end_date)}</p>
+                    <p><strong className="text-teal-700">Required Skills:</strong> {task.required_skills.join(", ")}</p>
+                    <p><strong className="text-teal-700">Volunteers Needed:</strong> {task.volunteers_needed}</p>
+                </div>
+
+                <div className="flex flex-col sm:flex-row gap-4 mt-6">
+                    <Button
+                        label="Confirm Apply"
+                        className="bg-teal-600 hover:bg-teal-700 text-white font-bold px-8 py-3 rounded-lg shadow-lg transition duration-200 text-lg w-full sm:w-auto"
+                        onClick={handleApply}
+                    />
+                    <Button
+                        label="Back"
+                        className="bg-gray-400 hover:bg-gray-500 text-white px-8 py-3 rounded-lg shadow transition duration-200 text-lg w-full sm:w-auto"
+                        onClick={() => navigate("/dashboard/volunteer")}
+                    />
+                </div>
             </div>
         </div>
     );

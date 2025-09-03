@@ -7,10 +7,19 @@ class TaskApplication extends Model
 {
     protected $fillable = ['volunteer_id', 'task_id', 'status'];
 
-    public function volunteer() {
+    public function volunteer()
+    {
         return $this->belongsTo(Volunteer::class);
     }
-    public function task() {
+
+    public function task() 
+    {
         return $this->belongsTo(Task::class);
     }
+
+    public function applications()
+    {
+        return $this->hasMany(\App\Models\TaskApplication::class);
+    }
+
 }

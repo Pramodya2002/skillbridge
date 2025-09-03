@@ -28,5 +28,11 @@ class Task extends Model
         return $this->belongsToMany(User::class, 'task_user', 'task_id', 'user_id');
     }
 
+    public function applications()
+    {
+        return $this->hasMany(\App\Models\TaskApplication::class);
+    }
+
+
     
 }

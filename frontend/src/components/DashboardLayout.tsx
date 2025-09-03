@@ -74,9 +74,9 @@ const DashboardLayout: React.FC = () => {
 
                 {/* Main content */}
                 <main className="flex-1 p-8 bg-gray-100">
-                    <div className="bg-white rounded-2xl shadow-lg p-6 animate-fadeIn">
-                        <Outlet />
-                    </div>
+
+                    <Outlet />
+
                 </main>
             </div>
 

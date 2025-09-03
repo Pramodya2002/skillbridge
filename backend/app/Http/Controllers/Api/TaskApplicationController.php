@@ -29,4 +29,15 @@ class TaskApplicationController extends Controller
 
         return response()->json($app, 201);
     }
+
+    public function myTasks($volunteerId)
+    {
+        $applications = \App\Models\TaskApplication::with('task')
+            ->where('volunteer_id', $volunteerId)
+            ->get();
+
+        return response()->json($applications);
+    }
+
 }
+
