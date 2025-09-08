@@ -11,8 +11,8 @@ const DashboardLayout: React.FC = () => {
 
     const menuItems = [
         { label: "Dashboard", path: "", icon: "pi pi-home" },
-        { label: "Tasks", path: "tasks", icon: "pi pi-briefcase" },
-        { label: "Profile", path: "profile", icon: "pi pi-user" },
+        { label: "My Tasks", path: "tasks", icon: "pi pi-briefcase" },
+        { label: "My Profile", path: "profile", icon: "pi pi-user" },
         { label: "Logout", path: "/logout", icon: "pi pi-sign-out" },
     ];
 

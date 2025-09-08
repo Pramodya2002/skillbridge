@@ -14,9 +14,7 @@ import NonprofitViewTask from './pages/dashboards/Nonprofit/NonprofitViewTask';
 import NonprofitCreateTask from "./pages/dashboards/Nonprofit/NonprofitCreateTask";
 import NonprofitProfile from "./pages/dashboards/Nonprofit/Profile";
 import VolunteerViewTask from './pages/dashboards/Volunteer/VolunteerViewTask';
-
-
-
+import VolunteerAppliedTaskView from "./pages/dashboards/Volunteer/VolunteerAppliedTaskVIew";
 import { Navigate } from 'react-router-dom';
 
 
@@ -34,6 +32,8 @@ function App() {
           <Route path="tasks" element={<VolunteerTasks />} />
           <Route path="profile" element={<VolunteerProfile />} />
           <Route path="/dashboard/volunteer/tasks/:id" element={<VolunteerViewTask />} />
+          <Route path="/dashboard/volunteer/applied-task/:id" element={<VolunteerAppliedTaskView />} />
+
         </Route>
         <Route path="/volunteer/dashboard" element={<Navigate to="/dashboard/volunteer" replace />} />
 

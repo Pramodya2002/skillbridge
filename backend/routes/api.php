@@ -6,6 +6,8 @@ use App\Http\Controllers\Api\LoginController;
 use App\Http\Controllers\Api\TaskController;
 use App\Http\Controllers\Api\VolunteerController;
 use App\Http\Controllers\Api\TaskApplicationController;
+use App\Http\Controllers\Api\ProfileController;
+
 
 
 
@@ -27,4 +29,14 @@ Route::post('/task-applications', [TaskApplicationController::class, 'store']);
 
 Route::get('/volunteers/{id}/matched-tasks', [VolunteerController::class, 'matchedTasks']);
 Route::get('/volunteers/{id}/tasks', [TaskApplicationController::class, 'myTasks']);
+Route::get('/volunteers/{id}', [VolunteerController::class, 'show']);
+Route::get('/tasks/{id}/applications', [TaskApplicationController::class, 'byTask']);
+Route::post('/task-applications/{id}/update-status', [TaskApplicationController::class, 'updateStatus']);
+
+
+
+Route::middleware('auth:api')->group(function () {
+    Route::get('/profile', [ProfileController::class, 'show']);
+    Route::post('/profile/update', [ProfileController::class, 'update']);
+});
 

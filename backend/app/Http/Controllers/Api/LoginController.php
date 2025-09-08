@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 use App\Models\User;
 
 class LoginController extends Controller
@@ -21,18 +22,19 @@ class LoginController extends Controller
             'password' => 'required|string|min:6',
         ]);
 
-        $credentials = $request->only('email', 'password');
+        $user = User::where('email', $request->email)->first();
 
     
-        if (!Auth::attempt($credentials)) {
-            return response()->json(['error' => 'Invalid credentials'], 401);
+        if (!$user || !Hash::check($request->password, $user->password)) {
+            return response()->json(['message' => 'Invalid credentials'], 401);
         }
 
-        $user = Auth::user();
+        $user->api_token = Str::random(60);
+        $user->save();
 
-      
-
+        
         return response()->json([
+            'token' => $user->api_token,
             'user' => [
                 'id' => $user->id,
                 'name' => $user->name,
@@ -48,9 +50,14 @@ class LoginController extends Controller
      */
     public function logout(Request $request)
     {
-       
+       $user = $request->user();
 
-        Auth::logout();
+        if ($user) {
+            // Clear API token on logout
+            $user->api_token = null;
+            $user->save();
+        }
+
         return response()->json(['message' => 'Logged out successfully']);
     }
 }

@@ -39,5 +39,43 @@ class TaskApplicationController extends Controller
         return response()->json($applications);
     }
 
+    public function byTask($taskId)
+    {
+        $applications = TaskApplication::with('volunteer.user')
+            ->where('task_id', $taskId)
+            ->get();
+
+        return response()->json($applications);
+    }
+
+    public function updateStatus(Request $request, $id)
+    {
+        $request->validate([
+            'status' => 'required|in:applied,accepted,rejected'
+        ]);
+
+        $application = TaskApplication::findOrFail($id);
+        $application->status = $request->status;
+        $application->save();
+
+        $task = $application->task;
+
+        if ($request->status === 'accepted') {
+            if ($task->status === 'Open') {
+                $task->status = 'Ongoing';
+            }
+
+            $acceptedCount = $task->applications()->where('status', 'accepted')->count();
+            if ($acceptedCount >= $task->volunteers_needed) {
+                $task->status = 'Ongoing'; 
+            }
+
+            $task->save();
+        }
+
+        return response()->json(['message' => 'Application updated', 'application' => $application, 'task' => $task]);
+    }
+
+
 }
 
