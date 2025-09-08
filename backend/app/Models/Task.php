@@ -12,6 +12,7 @@ class Task extends Model
         'location',
         'start_date',
         'end_date',
+        'cause',
         'required_skills',
         'volunteers_needed',
         'status',

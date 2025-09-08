@@ -18,11 +18,15 @@ class Volunteer extends Model
         'causes',
         'experience_level',
         'portfolio_url',
+        'max_hours_per_week',
+
     ];
 
     protected $casts = [
         'skills' => 'array',
         'causes' => 'array',
+        'availability' => 'array',
+
     ];
 
     public function user()

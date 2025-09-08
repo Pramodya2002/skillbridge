@@ -25,6 +25,9 @@ const Login: React.FC = () => {
 
             if (res.ok) {
                 const data = await res.json();
+                localStorage.setItem('authToken', data.token);
+                localStorage.setItem('user', JSON.stringify(data.user));
+
                 const userRole = data.user.role;
 
                 localStorage.setItem('user', JSON.stringify(data.user));

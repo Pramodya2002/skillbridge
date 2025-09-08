@@ -2,9 +2,13 @@ import React, { useEffect, useState } from "react";
 import { Card } from "primereact/card";
 import { Button } from "primereact/button";
 import { Tag } from "primereact/tag";
-import { Calendar } from "primereact/calendar";
 import { Dropdown } from "primereact/dropdown";
 import { useNavigate } from "react-router-dom";
+
+interface Skill {
+    skill: string;
+    level: string;
+}
 
 interface Task {
     id: number;
@@ -13,10 +17,11 @@ interface Task {
     location: string;
     start_date: string;
     end_date: string;
-    required_skills?: string[];
+    required_skills?: Skill[];
+    cause?: string | null;
 }
 
-type Match = { task: Task; score: number };
+type Match = { task: Task; score: number; reasons: string[] };
 
 const VolunteerMatches: React.FC = () => {
     const user = JSON.parse(localStorage.getItem("user") || "{}");
@@ -38,7 +43,19 @@ const VolunteerMatches: React.FC = () => {
         ])
             .then(([matches, applied]) => {
                 const appliedTaskIds = applied.map((a: any) => a.task.id);
-                setMatches(matches.filter((m: any) => !appliedTaskIds.includes(m.task.id)));
+                const parsedMatches = matches.map((m: any) => ({
+                    task: {
+                        ...m.task,
+                        required_skills: Array.isArray(m.task.required_skills)
+                            ? m.task.required_skills
+                            : JSON.parse(m.task.required_skills || "[]"),
+                        cause: m.task.cause || null,
+                    },
+                    score: m.score,
+                    reasons: m.reasons || []
+
+                }));
+                setMatches(parsedMatches.filter((m: any) => !appliedTaskIds.includes(m.task.id)));
             })
             .catch(console.error)
             .finally(() => setLoading(false));
@@ -77,10 +94,26 @@ const VolunteerMatches: React.FC = () => {
                             )}
                             {m.task.required_skills?.length && (
                                 <span className="bg-purple-100 px-3 py-1 rounded-lg text-purple-700">
-                                    🛠 {m.task.required_skills.join(", ")}
+                                    🛠 {m.task.required_skills.map(s => `${s.skill} (${s.level})`).join(", ")}
+                                </span>
+                            )}
+                            {m.task.cause && (
+                                <span className="bg-pink-100 px-3 py-1 rounded-lg text-pink-700">
+                                    🎯 {m.task.cause}
                                 </span>
                             )}
                         </div>
+
+                        {m.reasons.length > 0 && (
+                            <div className="mt-3 bg-green-50 p-3 rounded">
+                                <p className="font-semibold text-teal-700">Matched because:</p>
+                                <ul className="list-disc ml-6 text-gray-700 text-sm">
+                                    {m.reasons.map((r, i) => (
+                                        <li key={i}>{r}</li>
+                                    ))}
+                                </ul>
+                            </div>
+                        )}
                         <Button
                             label="View"
                             className="mt-4 bg-teal-600 hover:bg-teal-700 text-white px-6 py-3 rounded-lg shadow"
@@ -103,8 +136,8 @@ const VolunteerDashboardHome: React.FC = () => {
     const [searchTitle, setSearchTitle] = useState("");
     const [searchLocation, setSearchLocation] = useState("");
     const [searchSkill, setSearchSkill] = useState("");
-    const [startDate, setStartDate] = useState<Date | null>(null);
-    const [endDate, setEndDate] = useState<Date | null>(null);
+    const [startDate] = useState<Date | null>(null);
+    const [endDate] = useState<Date | null>(null);
 
     useEffect(() => {
         if (!volunteerId) return;
@@ -112,7 +145,14 @@ const VolunteerDashboardHome: React.FC = () => {
         // fetch all tasks
         fetch("http://localhost:8000/api/tasks")
             .then(res => res.json())
-            .then(data => setAllTasks(data))
+            .then(data => {
+                const parsedTasks = data.map((t: any) => ({
+                    ...t,
+                    required_skills: Array.isArray(t.required_skills) ? t.required_skills : JSON.parse(t.required_skills || "[]"),
+                    cause: t.cause || null,
+                }));
+                setAllTasks(parsedTasks);
+            })
             .catch(console.error);
 
         // fetch applied tasks for this volunteer
@@ -129,13 +169,13 @@ const VolunteerDashboardHome: React.FC = () => {
 
     const titles = Array.from(new Set(allTasks.map(t => t.title))).map(title => ({ label: title, value: title }));
     const locations = Array.from(new Set(allTasks.map(t => t.location))).map(loc => ({ label: loc, value: loc }));
-    const skills = Array.from(new Set(allTasks.flatMap(t => t.required_skills || []))).map(skill => ({ label: skill, value: skill }));
+    const skills = Array.from(new Set(allTasks.flatMap(t => t.required_skills?.map(s => s.skill) || []))).map(skill => ({ label: skill, value: skill }));
 
     const filteredTasks = allTasks.filter(task => !appliedTaskIds.includes(task.id))
         .filter((task) => {
             const matchTitle = searchTitle ? task.title === searchTitle : true;
             const matchLocation = searchLocation ? task.location === searchLocation : true;
-            const matchSkill = searchSkill ? task.required_skills?.includes(searchSkill) : true;
+            const matchSkill = searchSkill ? task.required_skills?.some(s => s.skill === searchSkill) : true;
 
             const matchStart = startDate ? new Date(task.start_date) >= startDate : true;
             const matchEnd = endDate ? new Date(task.end_date) <= endDate : true;
@@ -186,26 +226,6 @@ const VolunteerDashboardHome: React.FC = () => {
                         panelClassName="bg-white shadow-lg"
                         showClear
                     />
-                    <Calendar
-                        placeholder="Start Date"
-                        value={startDate}
-                        onChange={(e) => setStartDate(e.value as Date | null)}
-                        showIcon
-                        showButtonBar
-                        className="w-full md:w-1/6 border border-gray-300 rounded-lg bg-white p-2 shadow-sm"
-                        inputClassName="bg-white"
-                        panelClassName="bg-white shadow-lg"
-                    />
-                    <Calendar
-                        placeholder="End Date"
-                        value={endDate}
-                        onChange={(e) => setEndDate(e.value as Date | null)}
-                        showIcon
-                        showButtonBar
-                        className="w-full md:w-1/6 border border-gray-300 rounded-lg bg-white p-2 shadow-sm"
-                        inputClassName="bg-white"
-                        panelClassName="bg-white shadow-lg"
-                    />
                 </div>
 
 
@@ -229,7 +249,12 @@ const VolunteerDashboardHome: React.FC = () => {
                                 )}
                                 {t.required_skills?.length && (
                                     <span className="bg-purple-100 px-3 py-1 rounded-lg text-purple-700">
-                                        🛠 {t.required_skills.join(", ")}
+                                        🛠 {t.required_skills.map(s => `${s.skill} (${s.level})`).join(", ")}
+                                    </span>
+                                )}
+                                {t.cause && (
+                                    <span className="bg-pink-100 px-3 py-1 rounded-lg text-pink-700">
+                                        🎯 {t.cause}
                                     </span>
                                 )}
                             </div>

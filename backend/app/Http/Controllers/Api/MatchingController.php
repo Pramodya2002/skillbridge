@@ -8,7 +8,6 @@ use App\Models\Task;
 
 class MatchingController extends Controller
 {
-    // weights (tune later)
     private $weights = [
         'skills' => 50,
         'causes' => 20,
@@ -22,56 +21,47 @@ class MatchingController extends Controller
         $volunteer = Volunteer::findOrFail($volunteerId);
         $tasks = Task::where('status', 'Open')->get();
 
-        $matches = $tasks->map(function ($task) use ($volunteer) {
+        $levels = ['beginner' => 1, 'intermediate' => 2, 'expert' => 3];
+        $matches = $tasks->map(function ($task) use ($volunteer, $levels) {
             $score = 0;
+            $reasons = [];
 
-            // Skills match (both arrays)
-            $taskSkills = $task->required_skills ?? [];
+            $taskSkills = json_decode($task->required_skills, true) ?? [];
             $volSkills = $volunteer->skills ?? [];
-            if (!empty($taskSkills) && !empty($volSkills)) {
-                $common = count(array_intersect($taskSkills, $volSkills));
-                $score += ($common / max(count($taskSkills), 1)) * $this->weights['skills'];
-            }
 
-            // Causes match (if any cause matches)
-            $volCauses = $volunteer->causes ?? [];
-            // assume $task->cause if you store a cause per task (nullable), otherwise compare to nonprofit focus area
-            if (!empty($volCauses) && property_exists($task, 'cause') && $task->cause) {
-                if (in_array($task->cause, $volCauses)) {
-                    $score += $this->weights['causes'];
+            foreach ($taskSkills as $ts) {
+                foreach ($volSkills as $vs) {
+                    if ($vs['skill'] === $ts['skill']) {
+                        if (($levels[$vs['level']] ?? 0) >= ($levels[$ts['level']] ?? 0)) {
+                            $score += 25; 
+                            $reasons[] = "Skill: {$vs['skill']} ({$vs['level']})";
+                        }
+                    }
                 }
             }
 
-            // Availability - simple rule: if volunteer has any availability set, award weight
-            if (!empty($volunteer->availability)) {
-                // improving this requires mapping availability to dates/time slots
-                $score += $this->weights['availability'];
+            if ($task->cause && in_array($task->cause, $volunteer->causes ?? [])) {
+                $score += 20;
+                $reasons[] = "Cause: {$task->cause}";
             }
 
-            // Experience - if both present (you can add task.difficulty later)
-            if (!empty($volunteer->experience_level) && !empty($task->difficulty)) {
-                // you need to define ranking order: beginner < intermediate < expert
-                $levels = ['beginner' => 1, 'intermediate' => 2, 'expert' => 3];
-                $v = $levels[$volunteer->experience_level] ?? 0;
-                $t = $levels[$task->difficulty] ?? 0;
-                if ($v >= $t) {
-                    $score += $this->weights['experience'];
-                }
+            if (!empty($volunteer->availability) && $task->start_date && $task->end_date) {
+                $score += 20;
+                $reasons[] = "Availability matches task period";
             }
 
-            // Location (basic equality)
-            if (!empty($volunteer->location) && !empty($task->location) && $volunteer->location === $task->location) {
-                $score += $this->weights['location'];
+            if (!empty($volunteer->location) && $volunteer->location === $task->location) {
+                $score += 10;
+                $reasons[] = "Location: {$task->location}";
             }
 
             return [
                 'task' => $task,
-                'score' => min(100, round($score))
+                'score' => min(100, $score),
+                'reasons' => $reasons
             ];
         });
 
-        $ordered = $matches->sortByDesc('score')->values();
-
-        return response()->json($ordered);
+        return response()->json($matches->sortByDesc('score')->values());
     }
 }

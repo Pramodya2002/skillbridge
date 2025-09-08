@@ -5,6 +5,11 @@ import { Button } from "primereact/button";
 import { Tag } from "primereact/tag";
 import { useNavigate } from "react-router-dom";
 
+interface Skill {
+    skill: string;
+    level: string;
+}
+
 interface Task {
     id: number;
     title: string;
@@ -12,7 +17,8 @@ interface Task {
     location: string;
     start_date: string;
     end_date: string;
-    required_skills: string;
+    cause?: string | null;
+    required_skills: Skill[];
     volunteers_needed: number;
     status: "Open" | "Ongoing" | "Completed";
     applications_count?: number;
@@ -25,7 +31,7 @@ const NonprofitTasks: React.FC = () => {
     const fetchTasks = () => {
         fetch("http://localhost:8000/api/tasks")
             .then((res) => res.json())
-            .then((data) => setTasks(data))
+            .then((data) => setTasks(data.data ?? data))
             .catch((err) => console.error("Error fetching tasks:", err));
     };
 
@@ -91,39 +97,70 @@ const NonprofitTasks: React.FC = () => {
                     value={tasks}
                     stripedRows
                     scrollable
-                    tableStyle={{ minWidth: "1000px" }}
-                    className="shadow-sm rounded-lg text-lg"
+                    showGridlines
+                    tableStyle={{ minWidth: "1000px", borderCollapse: "collapse" }}
+                    className="shadow-sm rounded-lg text-base border border-gray-300"
                 >
-                    <Column field="title" header="Title" headerClassName="bg-gray-100 text-gray-800 font-bold text-lg" />
-                    <Column field="description" header="Description" headerClassName="bg-gray-100 text-gray-800 font-bold text-lg" />
-                    <Column field="location" header="Location" headerClassName="bg-gray-100 text-gray-800 font-bold text-lg" />
+                    <Column field="title" header="Title" headerClassName="bg-gray-100 text-gray-800 font-bold text-base border border-gray-300"
+                        bodyClassName="border border-gray-200 px-3 py-2" />
+
+                    <Column field="description" header="Description" headerClassName="bg-gray-100 text-gray-800 font-bold text-base border border-gray-300"
+                        bodyClassName="border border-gray-200 px-3 py-2" />
+
+                    <Column field="location" header="Location" headerClassName="bg-gray-100 text-gray-800 font-bold text-base border border-gray-300"
+                        bodyClassName="border border-gray-200 px-3 py-2" />
+
                     <Column
                         field="start_date"
                         header="Start Date"
                         body={(row) => formatDate(row.start_date)}
-                        headerClassName="bg-gray-100 text-gray-800 font-bold text-lg"
+                        headerClassName="bg-gray-100 text-gray-800 font-bold text-base border border-gray-300"
+                        bodyClassName="border border-gray-200 px-3 py-2"
                     />
+
                     <Column
                         field="end_date"
                         header="End Date"
                         body={(row) => formatDate(row.end_date)}
-                        headerClassName="bg-gray-100 text-gray-800 font-bold text-lg"
+                        headerClassName="bg-gray-100 text-gray-800 font-bold text-base border border-gray-300"
+                        bodyClassName="border border-gray-200 px-3 py-2"
                     />
-                    <Column field="required_skills" header="Required Skills" headerClassName="bg-gray-100 text-gray-800 font-bold text-lg" />
-                    <Column field="volunteers_needed" header="Volunteers Needed" headerClassName="bg-gray-100 text-gray-800 font-bold text-lg" />
+
+                    <Column field="cause" header="Cause" headerClassName="bg-gray-100 text-gray-800 font-bold text-base border border-gray-300"
+                        bodyClassName="border border-gray-200 px-3 py-2" />
+
+                    <Column
+                        field="required_skills"
+                        header="Required Skills"
+                        body={(row) =>
+                            Array.isArray(row.required_skills)
+                                ? row.required_skills.map((s: any) => `${s.skill} (${s.level})`).join(", ")
+                                : row.required_skills
+                        }
+                        headerClassName="bg-gray-100 text-gray-800 font-bold text-base border border-gray-300"
+                        bodyClassName="border border-gray-200 px-3 py-2"
+                    />
+
+                    <Column field="volunteers_needed" header="Volunteers Needed" headerClassName="bg-gray-100 text-gray-800 font-bold text-base border border-gray-300"
+                        bodyClassName="border border-gray-200 px-3 py-2 text-center" />
+
                     <Column
                         field="status"
                         header="Status"
                         body={statusBodyTemplate}
-                        headerClassName="bg-gray-100 text-gray-800 font-bold text-lg"
+                        headerClassName="bg-gray-100 text-gray-800 font-bold text-base border border-gray-300"
+                        bodyClassName="border border-gray-200 px-3 py-2 text-center"
                     />
+
                     <Column
                         field="applications_count"
                         header="Applied Volunteers"
-                        headerClassName="bg-gray-100 text-gray-800 font-bold text-lg"
+                        headerClassName="bg-gray-100 text-gray-800 font-bold text-base border border-gray-300"
+                        bodyClassName="border border-gray-200 px-3 py-2 text-center"
                     />
 
-                    <Column header="Actions" body={actionBodyTemplate} headerClassName="bg-gray-100 text-gray-800 font-bold text-lg" />
+                    <Column header="Actions" body={actionBodyTemplate} headerClassName="bg-gray-100 text-gray-800 font-bold text-base border border-gray-300"
+                        bodyClassName="border border-gray-200 px-3 py-2 text-center" />
                 </DataTable>
             </div>
         </div>
