@@ -10,10 +10,18 @@ class TaskApplicationController extends Controller
 {
     public function store(Request $request)
     {
+
+        $request->headers->set('Accept', 'application/json');
+
+        $volunteer = \App\Models\Volunteer::where('user_id', $request->user_id)->firstOrFail();
+
+
         $data = $request->validate([
-            'volunteer_id' => 'required|exists:volunteers,id',
             'task_id' => 'required|exists:tasks,id',
         ]);
+
+        $data['volunteer_id'] = $volunteer->id;
+
 
         $exists = TaskApplication::where('volunteer_id',$data['volunteer_id'])
             ->where('task_id',$data['task_id'])->first();
@@ -30,10 +38,12 @@ class TaskApplicationController extends Controller
         return response()->json($app, 201);
     }
 
-    public function myTasks($volunteerId)
+    public function myTasks($userId)
     {
+        $volunteer = Volunteer::where('user_id', $userId)->firstOrFail();
+
         $applications = \App\Models\TaskApplication::with('task')
-            ->where('volunteer_id', $volunteerId)
+            ->where('volunteer_id', $volunteer->id)
             ->get();
 
         return response()->json($applications);

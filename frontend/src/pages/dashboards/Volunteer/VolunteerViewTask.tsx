@@ -31,7 +31,6 @@ const VolunteerViewTask: React.FC = () => {
     const [task, setTask] = useState<Task | null>(null);
     const [showConfirm, setShowConfirm] = useState(false);
     const navigate = useNavigate();
-    const user = JSON.parse(localStorage.getItem("user") || "{}");
     const location = useLocation();
     const toast = useRef<Toast>(null);
     const reasons = (location.state as any)?.reasons || [];
@@ -55,18 +54,27 @@ const VolunteerViewTask: React.FC = () => {
 
     const handleApply = async () => {
         try {
+
+            const user = JSON.parse(localStorage.getItem("user") || "{}");
+
+            const payload = {
+                user_id: user.id,
+                task_id: task?.id
+            };
             const response = await fetch("http://localhost:8000/api/task-applications", {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    volunteer_id: user.volunteer_id || user.id,
-                    task_id: task?.id
-                }),
+                headers: {
+                    "Content-Type": "application/json",
+                    "Accept": "application/json"
+                },
+                body: JSON.stringify(payload),
             });
 
             if (!response.ok) {
                 const err = await response.json();
-                throw new Error(err.message || "Failed to apply");
+                const errorMsg = err.message ||
+                    (err.errors ? Object.values(err.errors).flat().join(", ") : "Failed to apply");
+                throw new Error(errorMsg);
             }
 
             toast.current?.show({
