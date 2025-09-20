@@ -163,8 +163,15 @@ const NonprofitCreateTask: React.FC = () => {
 
                     <div className="flex flex-col">
                         <label className="mb-1 font-semibold">Cause</label>
-                        <Dropdown value={cause} options={causeOptions} onChange={(e) => setCause(e.value)} placeholder="Select Cause" />
+                        <Dropdown
+                            value={cause}
+                            options={causeOptions}
+                            onChange={(e) => setCause(e.value)}
+                            placeholder="Select Cause"
+                            panelClassName="bg-teal-50"
+                        />
                     </div>
+
 
                     <div className="flex flex-col space-y-2">
                         <label className="mb-1 font-semibold">Required Skills & Levels</label>
