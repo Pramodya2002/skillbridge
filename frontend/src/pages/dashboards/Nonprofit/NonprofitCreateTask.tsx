@@ -79,12 +79,19 @@ const NonprofitCreateTask: React.FC = () => {
     const handleSubmit = async () => {
         if (!title || !description || !location || !startDate || !endDate || !volunteersNeeded) return;
 
+        const formatDate = (date: Date) => {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        };
+
         const newTask = {
             title,
             description,
             location,
-            start_date: startDate ? startDate.toISOString().split('T')[0] : null,
-            end_date: endDate ? endDate.toISOString().split('T')[0] : null,
+            start_date: formatDate(startDate!),
+            end_date: formatDate(endDate!),
             required_skills: requiredSkills,
             cause,
             volunteers_needed: volunteersNeeded,
@@ -168,7 +175,8 @@ const NonprofitCreateTask: React.FC = () => {
                             options={causeOptions}
                             onChange={(e) => setCause(e.value)}
                             placeholder="Select Cause"
-                            panelClassName="bg-teal-50"
+                            className="w-full border border-gray-300 rounded-md focus-within:border-teal-500 focus-within:ring-2 focus-within:ring-teal-200"
+                            panelClassName="bg-white border border-gray-300 rounded-md shadow-lg mt-1"
                         />
                     </div>
 
