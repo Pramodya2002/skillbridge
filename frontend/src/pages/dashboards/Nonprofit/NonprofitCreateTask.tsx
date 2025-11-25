@@ -55,11 +55,15 @@ const NonprofitCreateTask: React.FC = () => {
 
     const navigate = useNavigate();
 
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
     const statuses = [
         { label: "Open", value: "Open" },
         { label: "Ongoing", value: "Ongoing" },
         { label: "Completed", value: "Completed" },
     ];
+
 
     const addSkill = () => {
         if (selectedSkill && selectedLevel) {
@@ -77,7 +81,14 @@ const NonprofitCreateTask: React.FC = () => {
     };
 
     const handleSubmit = async () => {
-        if (!title || !description || !location || !startDate || !endDate || !volunteersNeeded) return;
+        if (!title || !description || !location || !startDate || !endDate || !volunteersNeeded) {
+            alert("Please fill all required fields");
+            return;
+        }
+        if (endDate! < startDate!) {
+            alert("End date cannot be earlier than start date");
+            return;
+        }
 
         const formatDate = (date: Date) => {
             const year = date.getFullYear();
@@ -113,6 +124,8 @@ const NonprofitCreateTask: React.FC = () => {
         }
     };
 
+
+
     return (
         <div className="flex justify-center items-start min-h-screen bg-gray-100 p-6">
             <div className="w-full max-w-2xl bg-white rounded-xl shadow-lg p-8 space-y-6">
@@ -146,26 +159,100 @@ const NonprofitCreateTask: React.FC = () => {
                         />
                     </div>
 
+                    {/* ========== START DATE ========== */}
                     <div className="flex flex-col">
-                        <label className="mb-1 font-semibold">Start Date</label>
+                        <label className="mb-2 font-semibold text-gray-700">Start Date</label>
                         <Calendar
                             value={startDate}
-                            onChange={(e) => setStartDate(e.value as Date)}
-                            className="w-full border border-gray-300 rounded px-3 py-2 bg-white focus:border-teal-500 focus:ring focus:ring-teal-200"
-                            panelClassName="bg-white border border-gray-300 shadow-lg rounded"
+                            onChange={(e) => setStartDate(e.value as Date | null)}
+                            minDate={today}
                             showIcon
+                            iconPos="left"
+                            dateFormat="dd/mm/yy"
+                            placeholder="Select start date"
+                            className="w-full"
+                            inputClassName="w-full h-12 px-4 rounded-lg border border-gray-300 focus:border-teal-500 focus:ring-4 focus:ring-teal-100"
+                            panelClassName="bg-white border border-gray-300 shadow-2xl mt-1 rounded-lg overflow-hidden"
+                            showButtonBar
+                            todayButtonClassName="p-button-text text-teal-600 hover:bg-teal-50"
+                            clearButtonClassName="p-button-text text-gray-600 hover:bg-gray-100"
+
+                            // This works in ALL PrimeReact versions
+                            dateTemplate={(date) => {
+                                const isToday = date.day === new Date().getDate() &&
+                                    date.month === new Date().getMonth() &&
+                                    date.year === new Date().getFullYear();
+
+                                const isSelected = startDate &&
+                                    date.day === startDate.getDate() &&
+                                    date.month === startDate.getMonth() &&
+                                    date.year === startDate.getFullYear();
+
+                                const isOtherMonth = date.month !== new Date().getMonth();
+
+                                let className = "p-2 text-center cursor-pointer";
+
+                                if (isOtherMonth) {
+                                    className += " text-gray-400 opacity-60";
+                                } else if (isToday) {
+                                    className += " bg-teal-100 text-teal-800 font-bold rounded-full";
+                                } else if (isSelected) {
+                                    className += " bg-teal-600 text-white font-bold rounded-full";
+                                }
+
+                                return <span className={className}>{date.day}</span>;
+                            }}
                         />
                     </div>
 
+                    {/* ========== END DATE ========== */}
                     <div className="flex flex-col">
-                        <label className="mb-1 font-semibold">End Date</label>
+                        <label className="mb-2 font-semibold text-gray-700">End Date</label>
                         <Calendar
                             value={endDate}
-                            onChange={(e) => setEndDate(e.value as Date)}
-                            className="w-full border border-gray-300 rounded px-3 py-2 bg-white focus:border-teal-500 focus:ring focus:ring-teal-200"
-                            panelClassName="bg-white border border-gray-300 shadow-lg rounded"
+                            onChange={(e) => setEndDate(e.value as Date | null)}
+                            minDate={startDate || today}
                             showIcon
+                            iconPos="left"
+                            dateFormat="dd/mm/yy"
+                            placeholder="Select end date"
+                            className="w-full"
+                            inputClassName="w-full h-12 px-4 rounded-lg border border-gray-300 focus:border-teal-500 focus:ring-4 focus:ring-teal-100"
+                            panelClassName="bg-white border border-gray-300 shadow-2xl mt-1 rounded-lg overflow-hidden"
+                            showButtonBar
+                            todayButtonClassName="p-button-text text-teal-600 hover:bg-teal-50"
+                            clearButtonClassName="p-button-text text-gray-600 hover:bg-gray-100"
+
+                            dateTemplate={(date) => {
+                                const isToday = date.day === new Date().getDate() &&
+                                    date.month === new Date().getMonth() &&
+                                    date.year === new Date().getFullYear();
+
+                                const isSelected = endDate &&
+                                    date.day === endDate.getDate() &&
+                                    date.month === endDate.getMonth() &&
+                                    date.year === endDate.getFullYear();
+
+                                const isOtherMonth = date.month !== new Date().getMonth();
+
+                                let className = "p-2 text-center cursor-pointer";
+
+                                if (isOtherMonth) {
+                                    className += " text-gray-400 opacity-60";
+                                } else if (isToday) {
+                                    className += " bg-teal-100 text-teal-800 font-bold rounded-full";
+                                } else if (isSelected) {
+                                    className += " bg-teal-600 text-white font-bold rounded-full";
+                                }
+
+                                return <span className={className}>{date.day}</span>;
+                            }}
                         />
+                        {startDate && endDate && endDate < startDate && (
+                            <small className="text-red-500 mt-2 font-medium">
+                                End date cannot be earlier than start date
+                            </small>
+                        )}
                     </div>
 
                     <div className="flex flex-col">
