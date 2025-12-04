@@ -30,8 +30,6 @@ const Login: React.FC = () => {
 
                 const userRole = data.user.role;
 
-                localStorage.setItem('user', JSON.stringify(data.user));
-
                 switch (userRole) {
                     case 'volunteer':
                         navigate('/volunteer/dashboard');
@@ -47,58 +45,96 @@ const Login: React.FC = () => {
                 }
             } else {
                 const err = await res.json();
-                setError(err.error || 'Login failed');
+                setError(err.error || 'Invalid email or password');
             }
         } catch (err) {
             console.error(err);
-            setError('Network error, check backend connection.');
+            setError('Network error. Please try again.');
         }
     };
 
     return (
-        <div className="flex flex-col min-h-screen bg-gradient-to-br from-teal-100 to-green-50">
+        <div className="min-h-screen bg-gradient-to-br from-teal-50 via-emerald-50 to-cyan-50 flex flex-col">
             <Header />
-            <main className="flex-1 flex justify-center items-center p-8">
-                <div className="max-w-md w-full p-10 bg-white rounded-2xl shadow-xl text-center transition-shadow hover:shadow-2xl">
-                    <h2 className="text-3xl font-bold mb-6 text-teal-700">Login to SkillBridge</h2>
-                    <form className="flex flex-col gap-5 text-left" onSubmit={handleSubmit}>
-                        <div className="flex flex-col">
-                            <label htmlFor="email" className="mb-2 font-semibold text-gray-700">Email Address</label>
-                            <input
-                                type="email"
-                                id="email"
-                                placeholder="Enter your email"
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                                required
-                                className="p-3 rounded-lg border border-gray-300 focus:border-teal-500 focus:ring-2 focus:ring-teal-300 outline-none"
-                            />
+
+            <div className="absolute inset-0 overflow-hidden pointer-events-none">
+                <div className="absolute top-32 -left-20 w-96 h-96 bg-teal-400 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse"></div>
+                <div className="absolute bottom-10 -right-32 w-80 h-80 bg-emerald-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse delay-700"></div>
+            </div>
+
+            <main className="flex-1 flex items-center justify-center px-6 pt-32 pb-20 relative z-10">
+                <div className="w-full max-w-lg bg-white/75 backdrop-blur-2xl rounded-3xl shadow-2xl border border-white/60 p-10 md:p-16 overflow-hidden group">
+                    <div className="absolute inset-0 bg-gradient-to-br from-teal-500/5 to-emerald-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-700 rounded-3xl"></div>
+
+                    <div className="relative z-10">
+                        <div className="text-center mb-12">
+                            <h1 className="text-5xl md:text-6xl font-black text-teal-900 mb-4 leading-tight">
+                                Welcome Back
+                            </h1>
+                            <p className="text-xl text-gray-700">Login to SkillBridge</p>
                         </div>
-                        <div className="flex flex-col">
-                            <label htmlFor="password" className="mb-2 font-semibold text-gray-700">Password</label>
-                            <input
-                                type="password"
-                                id="password"
-                                placeholder="Enter your password"
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                required
-                                className="p-3 rounded-lg border border-gray-300 focus:border-teal-500 focus:ring-2 focus:ring-teal-300 outline-none"
-                            />
-                        </div>
-                        {error && <p className="text-red-600 text-sm">{error}</p>}
-                        <button
-                            type="submit"
-                            className="p-3 bg-gradient-to-br from-teal-600 to-teal-700 text-white font-semibold rounded-lg text-lg hover:scale-105 hover:shadow-lg transition-transform"
-                        >
-                            Login
-                        </button>
-                        <p className="text-gray-600 text-sm mt-3 text-center">
-                            Don't have an account? <Link to="/register" className="text-teal-600 font-semibold hover:underline">Register</Link>
-                        </p>
-                    </form>
+
+                        <form onSubmit={handleSubmit} className="space-y-8">
+                            {/* Email Field */}
+                            <div className="relative">
+                                <label className="block text-teal-800 font-semibold text-lg mb-2 pl-1">
+                                    Email Address
+                                </label>
+                                <input
+                                    type="email"
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
+                                    required
+                                    autoComplete="email"
+                                    className="w-full px-6 py-5 bg-white/70 backdrop-blur border border-gray-300/60 rounded-2xl text-gray-800 text-lg placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-teal-500/30 focus:border-teal-500 transition-all duration-300 shadow-sm"
+                                    placeholder="emma@gmail.com"
+                                />
+                            </div>
+
+                            {/* Password Field */}
+                            <div className="relative">
+                                <label className="block text-teal-800 font-semibold text-lg mb-2 pl-1">
+                                    Password
+                                </label>
+                                <input
+                                    type="password"
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                    required
+                                    autoComplete="current-password"
+                                    className="w-full px-6 py-5 bg-white/70 backdrop-blur border border-gray-300/60 rounded-2xl text-gray-800 text-lg placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-teal-500/30 focus:border-teal-500 transition-all duration-300 shadow-sm"
+                                    placeholder="••••••••"
+                                />
+                            </div>
+
+                            {/* Error Message */}
+                            {error && (
+                                <div className="bg-red-50 border border-red-200 text-red-700 px-6 py-4 rounded-xl text-center font-medium">
+                                    {error}
+                                </div>
+                            )}
+
+                            {/* Login Button */}
+                            <button
+                                type="submit"
+                                className="w-full py-6 bg-gradient-to-r from-teal-600 to-emerald-600 text-white font-bold text-xl rounded-2xl shadow-xl hover:shadow-2xl transform hover:-translate-y-1 transition-all duration-300 flex items-center justify-center gap-3"
+                            >
+                                Login to Dashboard
+                                <i className="pi pi-arrow-right text-2xl"></i>
+                            </button>
+
+                            {/* Register Link */}
+                            <p className="text-center text-gray-600 text-lg mt-8">
+                                Don't have an account?{' '}
+                                <Link to="/register" className="text-teal-600 font-bold hover:underline">
+                                    Register here
+                                </Link>
+                            </p>
+                        </form>
+                    </div>
                 </div>
             </main>
+
             <Footer />
         </div>
     );

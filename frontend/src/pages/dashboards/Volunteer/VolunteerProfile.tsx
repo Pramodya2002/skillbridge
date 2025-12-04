@@ -1,5 +1,4 @@
 import React, { useEffect, useState, useRef } from "react";
-import { Card } from "primereact/card";
 import { Toast } from "primereact/toast";
 import Select from "react-select";
 import type { MultiValue, ActionMeta } from "react-select";
@@ -36,11 +35,7 @@ const causeOptions: OptionType[] = [
 const days = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"];
 const timeBlocks = ["morning", "afternoon", "evening", "flexible"];
 
-type SkillWithLevel = {
-    skill: string;
-    level: string;
-};
-
+type SkillWithLevel = { skill: string; level: string };
 type VolunteerData = {
     id?: number;
     name: string;
@@ -57,11 +52,7 @@ const VolunteerProfile: React.FC = () => {
     const toast = useRef<Toast>(null);
 
     const [volunteer, setVolunteer] = useState<VolunteerData>({
-        name: "",
-        email: "",
-        skills: [],
-        causes: [],
-        availability: {},
+        name: "", email: "", skills: [], causes: [], availability: {},
     });
 
     const [selectedSkills, setSelectedSkills] = useState<MultiValueType>([]);
@@ -72,9 +63,9 @@ const VolunteerProfile: React.FC = () => {
     const handleSkillsChange = (newSkills: MultiValue<OptionType>, _actionMeta: ActionMeta<OptionType>) => {
         const mutableSkills = [...newSkills];
         setSelectedSkills(mutableSkills);
-        const updatedLevels: { [skill: string]: string } = {};
+        const updatedLevels: { [skill: string]: string } = { ...skillLevels };
         mutableSkills.forEach((s) => {
-            updatedLevels[s.value] = skillLevels[s.value] || "beginner";
+            if (!updatedLevels[s.value]) updatedLevels[s.value] = "intermediate";
         });
         setSkillLevels(updatedLevels);
     };
@@ -83,7 +74,6 @@ const VolunteerProfile: React.FC = () => {
         setSelectedCauses([...newCauses]);
     };
 
-    // Fetch profile from backend
     useEffect(() => {
         const token = localStorage.getItem("authToken");
         fetch("http://localhost:8000/api/profile", {
@@ -96,7 +86,7 @@ const VolunteerProfile: React.FC = () => {
                 setSelectedSkills(
                     (roleData.skills || []).map((s: SkillWithLevel) => ({
                         value: s.skill,
-                        label: s.skill,
+                        label: s.skill.replace(/-/g, " ").replace(/\b\w/g, l => l.toUpperCase()),
                     }))
                 );
                 const levels: { [key: string]: string } = {};
@@ -105,12 +95,16 @@ const VolunteerProfile: React.FC = () => {
                 });
                 setSkillLevels(levels);
                 setSelectedCauses(
-                    (roleData.causes || []).map((c: string) => ({ value: c, label: c }))
+                    (roleData.causes || []).map((c: string) => ({
+                        value: c,
+                        label: c.replace(/-/g, " ").replace(/\b\w/g, l => l.toUpperCase()),
+                    }))
                 );
             })
-            .catch((err) => console.error("Error fetching volunteer profile:", err));
+            .catch((err) => console.error("Error fetching profile:", err));
     }, []);
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { id, value } = e.target;
         setVolunteer((prev) => ({ ...prev, [id]: value }));
     };
@@ -127,7 +121,7 @@ const VolunteerProfile: React.FC = () => {
             phone: volunteer.phone,
             skills: selectedSkills.map((s) => ({
                 skill: s.value,
-                level: skillLevels[s.value] || "beginner",
+                level: skillLevels[s.value] || "intermediate",
             })),
             causes: selectedCauses.map((c) => c.value),
             availability: availabilityMode === "weekly" ? volunteer.availability : {},
@@ -149,27 +143,52 @@ const VolunteerProfile: React.FC = () => {
             if (res.ok) {
                 toast.current?.show({
                     severity: "success",
-                    summary: "Profile Updated",
-                    detail: "Your profile has been successfully updated!",
-                    life: 5000,
-                    closable: true,
-                    style: {
-                        fontSize: '1.2rem',
-                        fontWeight: 'bold',
-                        backgroundColor: '#10B981',
-                        color: 'white',
-                        padding: '1rem 2rem',
-                        borderRadius: '1rem',
-                        boxShadow: '0 4px 12px rgba(0,0,0,0.2)'
+                    summary: "Profile Updated!",
+                    detail: "Your profile has been updated successfully!",
+                    life: 4000,
+
+                    className: "w-full max-w-md shadow-2xl",
+
+                    pt: {
+                        root: {
+                            className: "bg-gradient-to-r from-emerald-600 to-teal-600 text-white rounded-2xl overflow-hidden border-0"
+                        },
+                        icon: { className: "hidden" },
+                        content: { className: "flex-1" },
+                        summary: { className: "font-black text-xl" },
+                        detail: { className: "text-white/90 mt-1" },
+                        closeButton: {
+                            className: "text-white/70 hover:text-white hover:bg-white/20 rounded-full w-10 h-10 flex items-center justify-center transition-all"
+                        }
+
                     },
-                    icon: 'pi pi-check-circle'
+
+                    icon: () => (
+                        <div className="inline-flex items-center justify-center w-14 h-14 bg-white/25 rounded-full mr-5 shadow-xl">
+                            <i className="pi pi-check text-4xl text-white"></i>
+                        </div>
+                    ),
+
+                    style: {
+                        animation: "toastSlideIn 0.6s ease-out",
+                    }
                 });
             } else {
-                const errText = await res.text();
-                alert("Error: " + errText);
+                const err = await res.json();
+                toast.current?.show({
+                    severity: "error",
+                    summary: "Update Failed",
+                    detail: err.message || "Something went wrong",
+                    life: 5000,
+                });
             }
         } catch (err) {
-            console.error(err);
+            toast.current?.show({
+                severity: "error",
+                summary: "Network Error",
+                detail: "Please check your connection and try again",
+                life: 5000,
+            });
         }
     };
 
@@ -178,138 +197,275 @@ const VolunteerProfile: React.FC = () => {
             .split(" ")
             .map((n) => n[0])
             .join("")
-            .toUpperCase();
+            .toUpperCase()
+            .slice(0, 2);
+
+    const customSelectStyles = {
+        control: (base: any) => ({
+            ...base,
+            backgroundColor: "rgba(255, 255, 255, 0.6)",
+            backdropFilter: "blur(10px)",
+            border: "1px solid rgba(209, 213, 219, 0.5)",
+            borderRadius: "1rem",
+            padding: "0.5rem",
+            boxShadow: "0 4px 15px rgba(0,0,0,0.05)",
+            "&:hover": { borderColor: "#14b8a6" },
+        }),
+        multiValue: (base: any) => ({
+            ...base,
+            background: "linear-gradient(to right, #14b8a6, #10b981)",
+            color: "white",
+            borderRadius: "9999px",
+            padding: "0.25rem 0.75rem",
+        }),
+        multiValueLabel: (base: any) => ({
+            ...base,
+            color: "white",
+            fontWeight: "bold",
+        }),
+    };
 
     return (
-        <div className="flex justify-center py-10">
-            <Toast ref={toast} position="top-right" />
-            <Card className="w-full max-w-4xl rounded-3xl shadow-2xl bg-white p-10 animate-fadeIn">
-                {/* Header */}
-                <div className="flex flex-col items-center text-center mb-10">
-                    <div className="w-28 h-28 rounded-full bg-teal-500 flex items-center justify-center text-white text-3xl font-bold shadow-lg">
-                        {getInitials(volunteer.name || "V")}
-                    </div>
-                    <h1 className="text-3xl font-extrabold text-gray-800 mt-4">{volunteer.name}</h1>
-                    <p className="text-gray-500">{volunteer.email}</p>
-                </div>
+        <div className="min-h-screen bg-gradient-to-br from-teal-50 via-emerald-50 to-cyan-50 py-10 px-6">
+            <Toast
+                ref={toast}
+                position="top-right"
+                pt={{
+                    root: { className: "mt-20" },
+                    message: { className: "w-full max-w-md" }
+                }}
+            />
 
-                {/* Form */}
-                <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    <div className="space-y-4">
-                        <input id="name" value={volunteer.name} onChange={handleChange} placeholder="Full Name" className="w-full p-3 border rounded" />
-                        <input id="email" value={volunteer.email} onChange={handleChange} placeholder="Email" className="w-full p-3 border rounded" />
-                        <input id="phone" value={volunteer.phone} onChange={handleChange} placeholder="Phone" className="w-full p-3 border rounded" />
-                        <input id="portfolio" value={volunteer.portfolio} onChange={handleChange} placeholder="Portfolio URL" className="w-full p-3 border rounded" />
+            <div className="max-w-6xl mx-auto">
+                <div className="bg-white/70 backdrop-blur-2xl rounded-3xl shadow-2xl border border-white/50 p-10 md:p-16 overflow-hidden group">
+                    <div className="absolute inset-0 bg-gradient-to-br from-teal-500/5 to-emerald-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-700 rounded-3xl"></div>
 
-                        {/* Availability Mode Switch */}
-                        <div className="space-y-2">
-                            <label className="font-semibold">Availability Preference</label>
-                            <select
-                                value={availabilityMode}
-                                onChange={(e) => setAvailabilityMode(e.target.value as "weekly" | "hours")}
-                                className="w-full p-3 border rounded"
-                            >
-                                <option value="weekly">Weekly Availability</option>
-                                <option value="hours">Max Hours per Week</option>
-                            </select>
+                    <div className="relative z-10">
+                        {/* Profile Header */}
+                        <div className="text-center mb-12">
+                            <div className="relative inline-block">
+                                <div className="w-32 h-32 rounded-full bg-gradient-to-br from-teal-500 to-emerald-600 flex items-center justify-center text-white text-4xl font-black shadow-2xl ring-8 ring-white/50">
+                                    {getInitials(volunteer.name || "VB")}
+                                </div>
+                                <div className="absolute inset-0 rounded-full bg-gradient-to-br from-teal-400 to-emerald-500 blur-2xl opacity-50 animate-pulse"></div>
+                            </div>
+                            <h1 className="text-5xl font-black text-teal-900 mt-6">{volunteer.name}</h1>
+                            <p className="text-xl text-gray-600">{volunteer.email}</p>
                         </div>
 
-                        {/* Weekly Availability Grid */}
-                        {availabilityMode === "weekly" && (
-                            <div className="space-y-4">
-                                <label className="font-semibold text-teal-700">Weekly Availability</label>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    {days.map((day) => (
-                                        <div key={day} className="border p-3 rounded-lg">
-                                            <p className="capitalize font-semibold mb-2">{day}</p>
-                                            <div className="flex gap-3 flex-wrap">
-                                                {timeBlocks.map((block) => (
-                                                    <label key={block} className="flex items-center gap-1 text-sm">
-                                                        <input
-                                                            type="checkbox"
-                                                            checked={volunteer.availability?.[day]?.includes(block) || false}
-                                                            onChange={(e) => {
-                                                                setVolunteer((prev) => {
-                                                                    const newAvailability = { ...(prev.availability || {}) };
-                                                                    const slots = newAvailability[day] || [];
-                                                                    if (e.target.checked) {
-                                                                        newAvailability[day] = [...slots, block];
-                                                                    } else {
-                                                                        newAvailability[day] = slots.filter((s) => s !== block);
-                                                                    }
-                                                                    return { ...prev, availability: newAvailability };
-                                                                });
-                                                            }}
-                                                        />
-                                                        {block}
-                                                    </label>
+                        <form onSubmit={handleSubmit} className="space-y-10">
+                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
+                                {/* Left Column */}
+                                <div className="space-y-8">
+                                    {/* Basic Info */}
+                                    {/* Full Name */}
+                                    <div className="relative">
+                                        <input
+                                            id="name"
+                                            value={volunteer.name}
+                                            onChange={handleChange}
+                                            className="peer w-full px-6 py-5 bg-white/90 backdrop-blur-xl border-2 border-gray-300/70 rounded-2xl text-gray-900 font-medium placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-teal-500/40 focus:border-teal-600 transition-all duration-300 text-lg shadow-inner"
+                                            placeholder="Full Name"
+                                        />
+                                        <label className="absolute left-6 -top-3 px-3 bg-white text-sm font-bold text-teal-700 pointer-events-none transition-all duration-300 peer-focus:-top-3 peer-focus:text-teal-700 peer-focus:text-sm peer-placeholder-shown:top-5 peer-placeholder-shown:text-gray-500 peer-placeholder-shown:text-lg">
+                                            Full Name
+                                        </label>
+                                    </div>
+
+                                    {/* Email */}
+                                    <div className="relative">
+                                        <input
+                                            id="email"
+                                            value={volunteer.email}
+                                            onChange={handleChange}
+                                            className="peer w-full px-6 py-5 bg-white/90 backdrop-blur-xl border-2 border-gray-300/70 rounded-2xl text-gray-900 font-medium placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-teal-500/40 focus:border-teal-600 transition-all duration-300 text-lg shadow-inner"
+                                            placeholder="Email Address"
+                                        />
+                                        <label className="absolute left-6 -top-3 px-3 bg-white text-sm font-bold text-teal-700 pointer-events-none transition-all duration-300 peer-focus:-top-3 peer-focus:text-teal-700 peer-focus:text-sm peer-placeholder-shown:top-5 peer-placeholder-shown:text-gray-500 peer-placeholder-shown:text-lg">
+                                            Email Address
+                                        </label>
+                                    </div>
+
+                                    {/* Phone */}
+                                    <div className="relative">
+                                        <input
+                                            id="phone"
+                                            value={volunteer.phone || ""}
+                                            onChange={handleChange}
+                                            className="peer w-full px-6 py-5 bg-white/90 backdrop-blur-xl border-2 border-gray-300/70 rounded-2xl text-gray-900 font-medium placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-teal-500/40 focus:border-teal-600 transition-all duration-300 text-lg shadow-inner"
+                                            placeholder="Phone (Optional)"
+                                        />
+                                        <label className="absolute left-6 -top-3 px-3 bg-white text-sm font-bold text-teal-700 pointer-events-none transition-all duration-300 peer-focus:-top-3 peer-focus:text-teal-700 peer-focus:text-sm peer-placeholder-shown:top-5 peer-placeholder-shown:text-gray-500 peer-placeholder-shown:text-lg">
+                                            Phone (Optional)
+                                        </label>
+                                    </div>
+
+                                    {/* Portfolio */}
+                                    <div className="relative">
+                                        <input
+                                            id="portfolio"
+                                            value={volunteer.portfolio || ""}
+                                            onChange={handleChange}
+                                            className="peer w-full px-6 py-5 bg-white/90 backdrop-blur-xl border-2 border-gray-300/70 rounded-2xl text-gray-900 font-medium placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-teal-500/40 focus:border-teal-600 transition-all duration-300 text-lg shadow-inner"
+                                            placeholder="Portfolio / LinkedIn"
+                                        />
+                                        <label className="absolute left-6 -top-3 px-3 bg-white text-sm font-bold text-teal-700 pointer-events-none transition-all duration-300 peer-focus:-top-3 peer-focus:text-teal-700 peer-focus:text-sm peer-placeholder-shown:top-5 peer-placeholder-shown:text-gray-500 peer-placeholder-shown:text-lg">
+                                            Portfolio / LinkedIn
+                                        </label>
+                                    </div>
+
+                                    {/* Availability Mode */}
+                                    <div className="bg-white/60 backdrop-blur rounded-2xl p-6 border border-gray-200/50">
+                                        <p className="text-lg font-bold text-teal-800 mb-4">Availability Preference</p>
+                                        <div className="flex gap-4">
+                                            <button
+                                                type="button"
+                                                onClick={() => setAvailabilityMode("weekly")}
+                                                className={`flex-1 py-4 rounded-xl font-bold text-lg transition-all ${availabilityMode === "weekly"
+                                                    ? "bg-gradient-to-r from-teal-600 to-emerald-600 text-white shadow-xl"
+                                                    : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                                                    }`}
+                                            >
+                                                Weekly Schedule
+                                            </button>
+                                            <button
+                                                type="button"
+                                                onClick={() => setAvailabilityMode("hours")}
+                                                className={`flex-1 py-4 rounded-xl font-bold text-lg transition-all ${availabilityMode === "hours"
+                                                    ? "bg-gradient-to-r from-teal-600 to-emerald-600 text-white shadow-xl"
+                                                    : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                                                    }`}
+                                            >
+                                                Max Hours/Week
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    {availabilityMode === "hours" && (
+                                        <div className="relative">
+                                            <input
+                                                type="number"
+                                                value={volunteer.max_hours_per_week || ""}
+                                                onChange={(e) => setVolunteer(prev => ({ ...prev, max_hours_per_week: parseInt(e.target.value) || 0 }))}
+                                                className="peer w-full px-6 py-5 bg-white/60 backdrop-blur border border-gray-300/50 rounded-2xl text-gray-800 focus:outline-none focus:ring-4 focus:ring-teal-500/30 focus:border-teal-500 transition-all duration-300 text-lg"
+                                                placeholder=" "
+                                            />
+                                            <label className="absolute left-6 top-5 text-gray-500 text-lg pointer-events-none transition-all duration-300 peer-placeholder-shown:top-5 peer-focus:-top-4 peer-focus:text-teal-600 peer-focus:text-sm peer-focus:bg-white peer-focus:px-3 peer-focus:font-bold">
+                                                Max Hours per Week
+                                            </label>
+                                        </div>
+                                    )}
+                                </div>
+
+                                {/* Right Column */}
+                                <div className="space-y-8">
+                                    {/* Skills */}
+                                    <div>
+                                        <label className="block text-xl font-bold text-teal-800 mb-4">Your Skills</label>
+                                        <Select
+                                            isMulti
+                                            options={skillOptions}
+                                            value={selectedSkills}
+                                            onChange={handleSkillsChange}
+                                            styles={customSelectStyles}
+                                            className="text-lg"
+                                        />
+                                        <div className="mt-6 space-y-4">
+                                            {selectedSkills.map((skill) => (
+                                                <div key={skill.value} className="flex items-center gap-4 bg-white/60 backdrop-blur rounded-2xl p-5 border border-gray-200/50">
+                                                    <span className="font-semibold text-gray-800 flex-1">
+                                                        {skill.label}
+                                                    </span>
+                                                    <div className="flex gap-3">
+                                                        {["beginner", "intermediate", "expert"].map((level) => (
+                                                            <button
+                                                                key={level}
+                                                                type="button"
+                                                                onClick={() => handleSkillLevelChange(skill.value, level)}
+                                                                className={`px-5 py-2 rounded-full font-medium transition-all ${skillLevels[skill.value] === level
+                                                                    ? level === "beginner"
+                                                                        ? "bg-yellow-100 text-yellow-800 ring-2 ring-yellow-500"
+                                                                        : level === "intermediate"
+                                                                            ? "bg-blue-100 text-blue-800 ring-2 ring-blue-500"
+                                                                            : "bg-purple-100 text-purple-800 ring-2 ring-purple-500"
+                                                                    : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                                                                    }`}
+                                                            >
+                                                                {level.charAt(0).toUpperCase() + level.slice(1)}
+                                                            </button>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    {/* Causes */}
+                                    <div>
+                                        <label className="block text-xl font-bold text-teal-800 mb-4">Causes You Care About</label>
+                                        <Select
+                                            isMulti
+                                            options={causeOptions}
+                                            value={selectedCauses}
+                                            onChange={handleCausesChange}
+                                            styles={customSelectStyles}
+                                        />
+                                    </div>
+
+                                    {/* Weekly Availability */}
+                                    {availabilityMode === "weekly" && (
+                                        <div className="bg-white/60 backdrop-blur rounded-2xl p-6 border border-gray-200/50">
+                                            <p className="text-xl font-bold text-teal-800 mb-6">Weekly Availability</p>
+                                            <div className="grid grid-cols-2 gap-4">
+                                                {days.map((day) => (
+                                                    <div key={day} className="bg-white/80 rounded-xl p-4 border border-gray-200/50">
+                                                        <p className="font-bold text-gray-800 capitalize mb-3">{day}</p>
+                                                        <div className="flex flex-wrap gap-3">
+                                                            {timeBlocks.map((block) => (
+                                                                <label key={block} className="flex items-center gap-2 cursor-pointer">
+                                                                    <input
+                                                                        type="checkbox"
+                                                                        checked={volunteer.availability?.[day]?.includes(block) || false}
+                                                                        onChange={(e) => {
+                                                                            setVolunteer((prev) => {
+                                                                                const newAvail = { ...(prev.availability || {}) };
+                                                                                const slots = newAvail[day] || [];
+                                                                                if (e.target.checked) {
+                                                                                    newAvail[day] = [...slots, block];
+                                                                                } else {
+                                                                                    newAvail[day] = slots.filter((s) => s !== block);
+                                                                                }
+                                                                                return { ...prev, availability: newAvail };
+                                                                            });
+                                                                        }}
+                                                                        className="w-5 h-5 text-teal-600 rounded focus:ring-teal-500"
+                                                                    />
+                                                                    <span className="text-sm font-medium capitalize">{block}</span>
+                                                                </label>
+                                                            ))}
+                                                        </div>
+                                                    </div>
                                                 ))}
                                             </div>
                                         </div>
-                                    ))}
+                                    )}
                                 </div>
                             </div>
-                        )}
 
-                        {/* Max Hours per Week */}
-                        {availabilityMode === "hours" && (
-                            <div className="mt-4">
-                                <label className="block mb-1">Max Hours per Week</label>
-                                <input
-                                    type="number"
-                                    value={volunteer.max_hours_per_week || ""}
-                                    onChange={(e) =>
-                                        setVolunteer((prev) => ({
-                                            ...prev,
-                                            max_hours_per_week: parseInt(e.target.value) || 0,
-                                        }))
-                                    }
-                                    className="w-full p-3 border rounded"
-                                />
-                            </div>
-                        )}
-                    </div>
-
-                    <div className="space-y-4">
-                        {/* Skills with Levels */}
-                        <label>Skills</label>
-                        <Select
-                            isMulti
-                            options={skillOptions}
-                            value={selectedSkills}
-                            onChange={handleSkillsChange} />
-                        {selectedSkills.map((s) => (
-                            <div key={s.value} className="mt-2">
-                                <label className="block text-sm font-medium">{s.label} - Experience Level</label>
-                                <select
-                                    value={skillLevels[s.value] || "beginner"}
-                                    onChange={(e) => handleSkillLevelChange(s.value, e.target.value)}
-                                    className="w-full p-2 border rounded"
+                            {/* Save Button */}
+                            <div className="flex justify-center mt-12">
+                                <button
+                                    type="submit"
+                                    className="relative px-16 py-6 bg-gradient-to-r from-teal-600 to-emerald-600 text-white font-bold text-2xl rounded-full shadow-2xl hover:shadow-3xl transform hover:-translate-y-2 transition-all duration-300 overflow-hidden group/button"
                                 >
-                                    <option value="beginner">Beginner</option>
-                                    <option value="intermediate">Intermediate</option>
-                                    <option value="expert">Expert</option>
-                                </select>
+                                    <span className="relative z-10">Save Profile</span>
+                                    <span className="absolute inset-0 bg-white/30 scale-0 group-hover/button:scale-150 transition-transform duration-700 rounded-full"></span>
+                                </button>
                             </div>
-                        ))}
-
-                        {/* Causes */}
-                        <label>Causes</label>
-                        <Select
-                            isMulti
-                            options={causeOptions}
-                            value={selectedCauses}
-                            onChange={handleCausesChange}
-                        />
+                        </form>
                     </div>
-
-                    <div className="col-span-2 flex justify-center mt-6">
-                        <button type="submit" className="px-12 py-4 bg-teal-600 text-white font-bold rounded-full hover:bg-teal-700">
-                            Save Profile
-                        </button>
-                    </div>
-                </form>
-            </Card>
+                </div>
+            </div>
         </div>
     );
 };
