@@ -1,8 +1,25 @@
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
+import { Toast } from "primereact/toast";
 
 const DashboardHome: React.FC = () => {
+    const toast = useRef<Toast>(null);
     const user = JSON.parse(localStorage.getItem("user") || "{}");
+
+    useEffect(() => {
+        const hasSeenWelcome = localStorage.getItem("welcome_shown_nonprofit");
+        if (user?.id && !hasSeenWelcome) {
+            toast.current?.show({
+                severity: "success",
+                summary: `Welcome back, ${user.name || "Leader"}!`,
+                detail: "Complete your organization profile to attract more volunteers and post opportunities!",
+                life: 10000,
+                className: "text-lg",
+                contentClassName: "bg-gradient-to-r from-emerald-600 to-teal-600 text-white border-0 shadow-2xl",
+            });
+            localStorage.setItem("welcome_shown_nonprofit", "true");
+        }
+    }, [user?.id]);
 
     const stats = [
         { label: "Active Postings", value: 12, gradient: "from-teal-500 to-emerald-600", icon: "pi pi-briefcase", color: "teal" },
@@ -19,32 +36,34 @@ const DashboardHome: React.FC = () => {
     ];
 
     return (
-        <div className="space-y-12 py-8">
+        <div className="space-y-12 py-8 px-4 sm:px-6 lg:px-8">
+            <Toast ref={toast} />
+
             {/* Hero Welcome Section */}
-            <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-teal-600 via-emerald-600 to-cyan-700 p-12 text-white shadow-2xl">
+            <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-teal-600 via-emerald-600 to-cyan-700 p-8 sm:p-10 md:p-12 text-white shadow-2xl">
                 <div className="absolute inset-0 bg-black/20 backdrop-blur-sm"></div>
-                <div className="relative z-10 max-w-4xl">
-                    <h1 className="text-5xl md:text-6xl font-black leading-tight">
+                <div className="relative z-10 max-w-4xl mx-auto text-center sm:text-left">
+                    <h1 className="text-4xl sm:text-5xl md:text-6xl font-black leading-tight">
                         Welcome back, <span className="text-yellow-300">{user.name || "Nonprofit Leader"}!</span>
                     </h1>
-                    <p className="text-xl md:text-2xl mt-4 font-medium opacity-90">
+                    <p className="text-lg sm:text-xl md:text-2xl mt-4 font-medium opacity-90">
                         You're making a real impact. Here's your organization's overview.
                     </p>
-                    <div className="mt-8 flex items-center gap-4">
+                    <div className="mt-8 flex flex-col sm:flex-row items-center justify-center sm:justify-start gap-6">
                         <div className="flex -space-x-4">
-                            <div className="w-16 h-16 rounded-full bg-white/30 backdrop-blur border-4 border-white/50 flex items-center justify-center text-2xl font-bold">A</div>
-                            <div className="w-16 h-16 rounded-full bg-white/30 backdrop-blur border-4 border-white/50 flex items-center justify-center text-2xl font-bold">B</div>
-                            <div className="w-16 h-16 rounded-full bg-white/30 backdrop-blur border-4 border-white/50 flex items-center justify-center text-2xl font-bold">C</div>
-                            <div className="w-16 h-16 rounded-full bg-gradient-to-br from-yellow-400 to-pink-500 border-4 border-white flex items-center justify-center text-2xl font-bold shadow-lg">+</div>
+                            <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-white/30 backdrop-blur border-4 border-white/50 flex items-center justify-center text-xl sm:text-2xl font-bold">A</div>
+                            <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-white/30 backdrop-blur border-4 border-white/50 flex items-center justify-center text-xl sm:text-2xl font-bold">B</div>
+                            <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-white/30 backdrop-blur border-4 border-white/50 flex items-center justify-center text-xl sm:text-2xl font-bold">C</div>
+                            <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-gradient-to-br from-yellow-400 to-pink-500 border-4 border-white flex items-center justify-center text-xl sm:text-2xl font-bold shadow-lg">+</div>
                         </div>
-                        <p className="text-lg opacity-90">48 volunteers ready to help</p>
+                        <p className="text-base sm:text-lg opacity-90">48 volunteers ready to help</p>
                     </div>
                 </div>
-                <div className="absolute bottom-0 right-0 w-96 h-96 bg-white/10 rounded-full blur-3xl -mr-32 -mb-32"></div>
+                <div className="absolute bottom-0 right-0 w-80 sm:w-96 h-80 sm:h-96 bg-white/10 rounded-full blur-3xl -mr-20 sm:-mr-32 -mb-20 sm:-mb-32"></div>
             </div>
 
-            {/* Stats Grid - Glassmorphism Cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+            {/* Stats Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
                 {stats.map((stat, index) => (
                     <div
                         key={index}
@@ -53,15 +72,15 @@ const DashboardHome: React.FC = () => {
                         <div className={`absolute inset-0 bg-gradient-to-br ${stat.gradient} opacity-90 group-hover:opacity-100 transition-opacity`}></div>
                         <div className="absolute inset-0 bg-white/20 backdrop-blur-sm"></div>
 
-                        <div className="relative z-10 p-8 text-white">
+                        <div className="relative z-10 p-6 sm:p-8 text-white">
                             <div className="flex items-center justify-between mb-4">
-                                <i className={`${stat.icon} text-4xl opacity-90`}></i>
-                                <div className="w-12 h-12 rounded-full bg-white/20 backdrop-blur flex items-center justify-center">
-                                    <i className="pi pi-arrow-up text-xl"></i>
+                                <i className={`${stat.icon} text-3xl sm:text-4xl opacity-90`}></i>
+                                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white/20 backdrop-blur flex items-center justify-center">
+                                    <i className="pi pi-arrow-up text-lg sm:text-xl"></i>
                                 </div>
                             </div>
-                            <p className="text-lg font-medium opacity-90">{stat.label}</p>
-                            <p className="text-6xl font-black mt-3">{stat.value}</p>
+                            <p className="text-base sm:text-lg font-medium opacity-90">{stat.label}</p>
+                            <p className="text-5xl sm:text-6xl font-black mt-3">{stat.value}</p>
                             <div className="mt-4 h-2 bg-white/30 rounded-full overflow-hidden">
                                 <div className="h-full bg-white/60 rounded-full animate-pulse" style={{ width: `${Math.min(stat.value * 3, 100)}%` }}></div>
                             </div>
@@ -72,28 +91,28 @@ const DashboardHome: React.FC = () => {
                 ))}
             </div>
 
-            {/* Quick Actions - Premium Floating Cards */}
+            {/* Quick Actions */}
             <div>
-                <h2 className="text-4xl font-black text-teal-900 mb-8 text-center">Quick Actions</h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                <h2 className="text-3xl sm:text-4xl font-black text-teal-900 mb-8 text-center">Quick Actions</h2>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
                     {quickActions.map((action, index) => (
                         <Link
                             key={index}
                             to={action.to}
                             className="group relative block transform hover:-translate-y-4 transition-all duration-500"
                         >
-                            <div className="relative overflow-hidden rounded-3xl bg-white/90 backdrop-blur-2xl border border-white/70 shadow-2xl p-10 text-center hover:shadow-3xl">
+                            <div className="relative overflow-hidden rounded-3xl bg-white/90 backdrop-blur-2xl border border-white/70 shadow-2xl p-8 sm:p-10 text-center hover:shadow-3xl">
                                 <div className={`absolute inset-0 bg-gradient-to-br ${action.gradient} opacity-0 group-hover:opacity-100 transition-opacity duration-500`}></div>
                                 <div className="absolute inset-0 bg-white/40 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity"></div>
 
                                 <div className="relative z-10">
-                                    <div className="w-24 h-24 mx-auto mb-6 rounded-full bg-gradient-to-br from-white/50 to-white/30 backdrop-blur-xl border-4 border-white/60 flex items-center justify-center shadow-2xl group-hover:scale-110 transition-transform">
-                                        <i className={`${action.icon} text-5xl text-white drop-shadow-lg`}></i>
+                                    <div className="w-20 h-20 sm:w-24 sm:h-24 mx-auto mb-6 rounded-full bg-gradient-to-br from-white/50 to-white/30 backdrop-blur-xl border-4 border-white/60 flex items-center justify-center shadow-2xl group-hover:scale-110 transition-transform">
+                                        <i className={`${action.icon} text-4xl sm:text-5xl text-white drop-shadow-lg`}></i>
                                     </div>
-                                    <h3 className="text-2xl font-black text-gray-800 group-hover:text-white transition-colors">
+                                    <h3 className="text-xl sm:text-2xl font-black text-gray-800 group-hover:text-white transition-colors">
                                         {action.label}
                                     </h3>
-                                    <p className="mt-3 text-gray-600 group-hover:text-white/90 font-medium">
+                                    <p className="mt-3 text-gray-600 group-hover:text-white/90 font-medium text-sm sm:text-base">
                                         Click to get started
                                     </p>
                                 </div>
@@ -105,12 +124,11 @@ const DashboardHome: React.FC = () => {
                 </div>
             </div>
 
-            {/* Motivational Footer */}
             <div className="text-center py-12">
-                <p className="text-3xl font-bold text-teal-800">
+                <p className="text-2xl sm:text-3xl font-bold text-teal-800">
                     Every opportunity you post changes lives.
                 </p>
-                <p className="text-xl text-gray-600 mt-4">
+                <p className="text-lg sm:text-xl text-gray-600 mt-4">
                     Thank you for building a better world.
                 </p>
             </div>

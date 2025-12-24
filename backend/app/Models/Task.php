@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Models\User; 
 
 class Task extends Model
 {
@@ -16,6 +17,7 @@ class Task extends Model
         'required_skills',
         'volunteers_needed',
         'status',
+        'nonprofit_id',
     ];
 
     protected $casts = [
@@ -23,6 +25,12 @@ class Task extends Model
         'start_date' => 'date',
         'end_date' => 'date',
     ];
+
+
+    public function nonprofit()
+    {
+        return $this->belongsTo(User::class, 'nonprofit_id');
+    }
 
     public function volunteers()
     {

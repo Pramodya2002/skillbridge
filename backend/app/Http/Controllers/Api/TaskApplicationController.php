@@ -87,5 +87,33 @@ class TaskApplicationController extends Controller
     }
 
 
+    public function withdraw(Request $request, $applicationId)
+    {
+        $volunteerId = $request->input('volunteer_id');
+
+        if (!$volunteerId) {
+            return response()->json(['error' => 'Volunteer ID is required'], 400);
+        }
+
+        $application = TaskApplication::find($applicationId);
+
+        if (!$application) {
+            return response()->json(['error' => 'Application not found'], 404);
+        }
+
+        if ($application->volunteer_id != $volunteerId) {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+
+        if ($application->status === 'accepted') {
+            return response()->json(['error' => 'Cannot withdraw an accepted application'], 400);
+        }
+
+        $application->delete();
+
+        return response()->json(['message' => 'Application withdrawn successfully']);
+    }
+
+
 }
 

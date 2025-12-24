@@ -29,10 +29,38 @@ const NonprofitTasks: React.FC = () => {
     const navigate = useNavigate();
 
     const fetchTasks = () => {
-        fetch("http://localhost:8000/api/tasks")
-            .then((res) => res.json())
-            .then((data) => setTasks(data.data ?? data))
-            .catch((err) => console.error("Error fetching tasks:", err));
+        const token = localStorage.getItem("authToken");
+
+        if (!token) {
+            console.error("No auth token found. Please log in again.");
+            return;
+        }
+
+        fetch("http://localhost:8000/api/tasks", {
+            method: "GET",
+            headers: {
+                "Authorization": `Bearer ${token}`,
+                "Accept": "application/json",
+                "Content-Type": "application/json",
+            },
+        })
+            .then((res) => {
+                if (!res.ok) {
+                    if (res.status === 401) {
+                        alert("Session expired. Please log in again.");
+                        localStorage.removeItem("token");
+                        navigate("/login");
+                    }
+                    throw new Error("Failed to fetch tasks");
+                }
+                return res.json();
+            })
+            .then((response) => {
+                setTasks(response.data ?? []);
+            })
+            .catch((err) => {
+                console.error("Error fetching tasks:", err);
+            });
     };
 
     useEffect(() => {
@@ -61,7 +89,7 @@ const NonprofitTasks: React.FC = () => {
             <div className="flex justify-center">
                 <Tag
                     value={config.label}
-                    className={`px-6 py-3 text-white font-bold text-lg rounded-full bg-gradient-to-r ${config.gradient} shadow-lg ${config.glow} transform hover:scale-105 transition-all duration-300`}
+                    className={`px-5 py-2.5 sm:px-6 sm:py-3 text-base sm:text-lg font-bold rounded-full bg-gradient-to-r ${config.gradient} text-white shadow-lg ${config.glow} transform hover:scale-105 transition-all duration-300`}
                 />
             </div>
         );
@@ -71,10 +99,10 @@ const NonprofitTasks: React.FC = () => {
         <div className="flex justify-center">
             <button
                 onClick={() => navigate(`/dashboard/nonprofit/tasks/${row.id}`)}
-                className="group relative px-8 py-4 bg-gradient-to-r from-teal-600 to-emerald-600 text-white font-bold text-lg rounded-2xl shadow-xl hover:shadow-2xl transform hover:-translate-y-1 transition-all duration-300 overflow-hidden"
+                className="group relative px-6 py-3 sm:px-8 sm:py-4 bg-gradient-to-r from-teal-600 to-emerald-600 text-white font-bold text-base sm:text-lg rounded-2xl shadow-xl hover:shadow-2xl transform hover:-translate-y-1 transition-all duration-300 overflow-hidden"
             >
-                <span className="relative z-10 flex items-center gap-3">
-                    <i className="pi pi-eye text-xl"></i>
+                <span className="relative z-10 flex items-center gap-2 sm:gap-3">
+                    <i className="pi pi-eye text-lg sm:text-xl"></i>
                     View Task
                 </span>
                 <div className="absolute inset-0 bg-white/30 scale-0 group-hover:scale-150 transition-transform duration-700 rounded-2xl"></div>
@@ -83,127 +111,137 @@ const NonprofitTasks: React.FC = () => {
     );
 
     return (
-        <div className="min-h-screen space-y-12 py-8 px-6">
-            <div className="text-center mb-16">
-                <h1 className="text-6xl font-black text-teal-800 mb-4">
+        <div className="min-h-screen space-y-12 py-8 px-4 sm:px-6">
+            <div className="text-center mb-12 sm:mb-16">
+                <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black text-teal-800 mb-4">
                     Manage Opportunities
                 </h1>
-                <p className="text-2xl text-gray-700 font-medium max-w-4xl mx-auto">
+                <p className="text-lg sm:text-2xl text-gray-700 font-medium max-w-4xl mx-auto">
                     Create, track, and manage all volunteer opportunities for your organization
                 </p>
             </div>
 
             <div className="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-6 mb-8">
                 <div className="text-left">
-                    <p className="text-lg text-gray-600">
+                    <p className="text-base sm:text-lg text-gray-600">
                         Total Active Opportunities: <span className="font-bold text-teal-700">{tasks.length}</span>
                     </p>
                 </div>
-                <div className="flex gap-4">
+                <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
                     <Button
                         label="Refresh List"
                         icon="pi pi-refresh"
                         onClick={fetchTasks}
-                        className="px-8 py-4 bg-white border-2 border-teal-600 text-teal-700 font-bold rounded-2xl shadow-lg hover:shadow-xl hover:bg-teal-50 transition-all duration-300"
+                        className="px-8 py-4 bg-white border-2 border-teal-600 text-teal-700 font-bold rounded-2xl shadow-lg hover:shadow-xl hover:bg-teal-50 transition-all duration-300 w-full sm:w-auto"
                     />
                     <Button
                         label="Create New Opportunity"
                         icon="pi pi-plus-circle"
                         onClick={() => navigate("/dashboard/nonprofit/create-task")}
-                        className="px-10 py-4 bg-gradient-to-r from-teal-600 to-emerald-600 text-white font-black text-xl rounded-2xl shadow-2xl hover:shadow-3xl hover:scale-105 transition-all duration-300"
+                        className="px-10 py-4 bg-gradient-to-r from-teal-600 to-emerald-600 text-white font-black text-lg sm:text-xl rounded-2xl shadow-2xl hover:shadow-3xl hover:scale-105 transition-all duration-300 w-full sm:w-auto"
                     />
                 </div>
             </div>
 
             <div className="max-w-7xl mx-auto">
                 <div className="bg-white rounded-3xl shadow-2xl border border-gray-200 overflow-hidden">
-                    <div className="p-8">
-                        <DataTable
-                            value={tasks}
-                            emptyMessage={
-                                <div className="text-center py-20">
-                                    <i className="pi pi-briefcase text-9xl text-gray-300 mb-8"></i>
-                                    <p className="text-3xl font-bold text-gray-500">No opportunities yet</p>
-                                    <p className="text-xl text-gray-400 mt-4">Click "Create New Opportunity" to get started</p>
-                                </div>
-                            }
-                            className="rounded-2xl overflow-hidden"
-                            stripedRows
-                            rowHover
-                            tableStyle={{ minWidth: "50rem" }}
-                        >
-                            {/* Task Title */}
-                            <Column
-                                field="title"
-                                header="Opportunity Title"
-                                headerClassName="bg-gradient-to-b from-gray-50 to-gray-100 text-gray-800 font-bold py-6 text-lg border-r-2 border-gray-300"
-                                headerStyle={{ textAlign: "center" }}
-                                bodyClassName="px-6 py-6 text-left font-semibold text-gray-800 border-r border-gray-200"
-                                body={(row) => <span className="text-teal-700">{row.title}</span>}
-                                style={{ minWidth: "300px" }}
-                            />
+                    <div className="p-6 sm:p-8">
+                        <div className="lg:hidden text-center text-sm text-gray-500 mb-4">
+                            ← Scroll horizontally to view all columns →
+                        </div>
 
-                            {/* Location */}
-                            <Column
-                                field="location"
-                                header="Location"
-                                headerClassName="bg-gradient-to-b from-gray-50 to-gray-100 text-gray-800 font-bold text-center py-6 text-lg border-r-2 border-gray-300"
-                                bodyClassName="px-6 py-6 text-center text-gray-700 border-r border-gray-200"
-                                body={(row) => row.location || "Remote"}
-                            />
-
-                            {/* End Date */}
-                            <Column
-                                field="end_date"
-                                header="Application Deadline"
-                                headerClassName="bg-gradient-to-b from-gray-50 to-gray-100 text-gray-800 font-bold py-6 text-lg border-r-2 border-gray-300"
-                                headerStyle={{ textAlign: "center" }}
-                                bodyClassName="px-6 py-6 text-center font-bold text-teal-700 border-r border-gray-200"
-                                body={(row) => formatDate(row.end_date)}
-                            />
-
-                            {/* Volunteers Needed */}
-                            <Column
-                                field="volunteers_needed"
-                                header="Volunteers Needed"
-                                headerClassName="bg-gradient-to-b from-gray-50 to-gray-100 text-gray-800 font-bold text-center py-6 text-lg border-r-2 border-gray-300"
-                                bodyClassName="px-6 py-6 text-center font-bold text-emerald-600 border-r border-gray-200"
-                                body={(row) => (
-                                    <div className="inline-flex items-center gap-2">
-                                        <i className="pi pi-users"></i>
-                                        {row.volunteers_needed}
+                        <div className="overflow-x-auto -mx-6 sm:-mx-8 px-6 sm:px-8">
+                            <DataTable
+                                value={tasks}
+                                emptyMessage={
+                                    <div className="text-center py-16 sm:py-20">
+                                        <i className="pi pi-briefcase text-7xl sm:text-9xl text-gray-300 mb-8"></i>
+                                        <p className="text-2xl sm:text-3xl font-bold text-gray-500">No opportunities yet</p>
+                                        <p className="text-lg sm:text-xl text-gray-400 mt-4">Click "Create New Opportunity" to get started</p>
                                     </div>
-                                )}
-                            />
+                                }
+                                className="rounded-2xl overflow-hidden"
+                                stripedRows
+                                rowHover
+                                tableStyle={{ minWidth: "50rem" }}
+                                scrollable
+                                scrollHeight="flexible"
+                            >
+                                {/* Task Title */}
+                                <Column
+                                    field="title"
+                                    header="Opportunity Title"
+                                    headerClassName="bg-gradient-to-b from-gray-50 to-gray-100 text-gray-800 font-bold py-5 sm:py-6 text-sm sm:text-lg text-center border-r-2 border-gray-300"
+                                    bodyClassName="px-4 sm:px-6 py-5 sm:py-6 text-left font-semibold text-gray-800 text-sm sm:text-base border-r border-gray-200"
+                                    body={(row) => <span className="text-teal-700">{row.title}</span>}
+                                    style={{ minWidth: "260px", width: "30%" }}
+                                />
 
-                            {/* Applications */}
-                            <Column
-                                field="applications_count"
-                                header="Applications"
-                                headerClassName="bg-gradient-to-b from-gray-50 to-gray-100 text-gray-800 font-bold text-center py-6 text-lg border-r-2 border-gray-300"
-                                bodyClassName="px-6 py-6 text-center font-bold text-purple-700 border-r border-gray-200"
-                                body={(row) => row.applications_count ?? 0}
-                            />
+                                {/* Location */}
+                                <Column
+                                    field="location"
+                                    header="Location"
+                                    headerClassName="bg-gradient-to-b from-gray-50 to-gray-100 text-gray-800 font-bold py-5 sm:py-6 text-sm sm:text-lg text-center border-r-2 border-gray-300"
+                                    bodyClassName="px-4 sm:px-6 py-5 sm:py-6 text-center text-gray-700 text-sm sm:text-base border-r border-gray-200"
+                                    body={(row) => row.location || "Remote"}
+                                    style={{ minWidth: "120px", width: "15%" }}
+                                />
 
-                            {/* Status */}
-                            <Column
-                                field="status"
-                                header="Status"
-                                headerClassName="bg-gradient-to-b from-gray-50 to-gray-100 text-gray-800 font-bold text-center py-6 text-lg border-r-2 border-gray-300"
-                                bodyClassName="px-6 py-6 border-r border-gray-200"
-                                body={statusTemplate}
-                                style={{ minWidth: "180px" }}
-                            />
+                                {/* End Date */}
+                                <Column
+                                    field="end_date"
+                                    header="Application Deadline"
+                                    headerClassName="bg-gradient-to-b from-gray-50 to-gray-100 text-gray-800 font-bold py-5 sm:py-6 text-sm sm:text-lg text-center border-r-2 border-gray-300"
+                                    bodyClassName="px-4 sm:px-6 py-5 sm:py-6 text-center font-bold text-teal-700 text-sm sm:text-base border-r border-gray-200"
+                                    body={(row) => formatDate(row.end_date)}
+                                    style={{ minWidth: "140px", width: "15%" }}
+                                />
 
-                            {/* Action */}
-                            <Column
-                                header="Action"
-                                headerClassName="bg-gradient-to-b from-gray-50 to-gray-100 text-gray-800 font-bold text-center py-6 text-lg"
-                                bodyClassName="px-6 py-6 text-center"
-                                body={actionTemplate}
-                                style={{ minWidth: "220px" }}
-                            />
-                        </DataTable>
+                                {/* Volunteers Needed */}
+                                <Column
+                                    field="volunteers_needed"
+                                    header="Volunteers Needed"
+                                    headerClassName="bg-gradient-to-b from-gray-50 to-gray-100 text-gray-800 font-bold py-5 sm:py-6 text-sm sm:text-lg text-center border-r-2 border-gray-300"
+                                    bodyClassName="px-4 sm:px-6 py-5 sm:py-6 text-center font-bold text-emerald-600 text-sm sm:text-base border-r border-gray-200"
+                                    body={(row) => (
+                                        <div className="inline-flex items-center gap-2">
+                                            <i className="pi pi-users"></i>
+                                            {row.volunteers_needed}
+                                        </div>
+                                    )}
+                                    style={{ minWidth: "140px", width: "12%" }}
+                                />
+
+                                {/* Applications */}
+                                <Column
+                                    field="applications_count"
+                                    header="Applications"
+                                    headerClassName="bg-gradient-to-b from-gray-50 to-gray-100 text-gray-800 font-bold py-5 sm:py-6 text-sm sm:text-lg text-center border-r-2 border-gray-300"
+                                    bodyClassName="px-4 sm:px-6 py-5 sm:py-6 text-center font-bold text-purple-700 text-sm sm:text-base border-r border-gray-200"
+                                    body={(row) => row.applications_count ?? 0}
+                                    style={{ minWidth: "100px", width: "10%" }}
+                                />
+
+                                {/* Status */}
+                                <Column
+                                    field="status"
+                                    header="Status"
+                                    headerClassName="bg-gradient-to-b from-gray-50 to-gray-100 text-gray-800 font-bold py-5 sm:py-6 text-sm sm:text-lg text-center border-r-2 border-gray-300"
+                                    bodyClassName="px-4 sm:px-6 py-5 sm:py-6 border-r border-gray-200"
+                                    body={statusTemplate}
+                                    style={{ minWidth: "160px", width: "12%" }}
+                                />
+
+                                {/* Action */}
+                                <Column
+                                    header="Action"
+                                    headerClassName="bg-gradient-to-b from-gray-50 to-gray-100 text-gray-800 font-bold py-5 sm:py-6 text-sm sm:text-lg text-center"
+                                    bodyClassName="px-4 sm:px-6 py-5 sm:py-6 text-center"
+                                    body={actionTemplate}
+                                    style={{ minWidth: "160px", width: "16%" }}
+                                />
+                            </DataTable>
+                        </div>
                     </div>
                 </div>
             </div>
