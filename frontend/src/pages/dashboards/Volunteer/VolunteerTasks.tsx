@@ -43,7 +43,7 @@ const VolunteerTasks: React.FC = () => {
             <div className="flex justify-center">
                 <Tag
                     value={config.label}
-                    className={`px-6 py-3 text-white font-bold text-lg rounded-full bg-gradient-to-r ${config.gradient} shadow-lg ${config.glow} transform hover:scale-105 transition-all duration-300`}
+                    className={`px-5 py-2.5 sm:px-6 sm:py-3 text-base sm:text-lg font-bold rounded-full bg-gradient-to-r ${config.gradient} text-white shadow-lg ${config.glow} transform hover:scale-105 transition-all duration-300`}
                 />
             </div>
         );
@@ -53,10 +53,10 @@ const VolunteerTasks: React.FC = () => {
         <div className="flex justify-center">
             <button
                 onClick={() => navigate(`/dashboard/volunteer/applied-task/${row.task.id}`)}
-                className="group relative px-8 py-4 bg-gradient-to-r from-teal-600 to-emerald-600 text-white font-bold text-lg rounded-2xl shadow-xl hover:shadow-2xl transform hover:-translate-y-1 transition-all duration-300 overflow-hidden"
+                className="group relative px-6 py-3 sm:px-8 sm:py-4 bg-gradient-to-r from-teal-600 to-emerald-600 text-white font-bold text-base sm:text-lg rounded-2xl shadow-xl hover:shadow-2xl transform hover:-translate-y-1 transition-all duration-300 overflow-hidden"
             >
-                <span className="relative z-10 flex items-center gap-3">
-                    <i className="pi pi-eye text-xl"></i>
+                <span className="relative z-10 flex items-center gap-2 sm:gap-3">
+                    <i className="pi pi-eye text-lg sm:text-xl"></i>
                     View Task
                 </span>
                 <div className="absolute inset-0 bg-white/30 scale-0 group-hover:scale-150 transition-transform duration-700 rounded-2xl"></div>
@@ -73,93 +73,98 @@ const VolunteerTasks: React.FC = () => {
         });
     };
 
-
-
     return (
-        <div className="min-h-screen space-y-12 py-8 px-6">
+        <div className="min-h-screen space-y-12 py-8 px-4 sm:px-6">
             {/* Page Header */}
-            <div className="text-center mb-16">
-                <h1 className="text-6xl font-black text-teal-800 mb-4">
+            <div className="text-center mb-12 sm:mb-16">
+                <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black text-teal-800 mb-4">
                     My Tasks
                 </h1>
-                <p className="text-2xl text-gray-700 font-medium">
+                <p className="text-lg sm:text-2xl text-gray-700 font-medium">
                     Track all the opportunities you're part of
                 </p>
             </div>
 
             <div className="max-w-7xl mx-auto">
                 <div className="bg-white rounded-3xl shadow-2xl border border-gray-200 overflow-hidden">
-                    <div className="p-8">
-                        <DataTable
-                            value={tasks}
-                            emptyMessage={
-                                <div className="text-center py-20">
-                                    <p className="text-2xl font-bold text-gray-500">No tasks yet</p>
-                                    <p className="text-gray-400 mt-2">Your applied and completed tasks will appear here</p>
-                                </div>
-                            }
-                            className="rounded-2xl overflow-hidden"
-                            stripedRows
-                            rowHover
-                            tableStyle={{ minWidth: "50rem" }}
+                    <div className="p-6 sm:p-8">
+                        <div className="lg:hidden text-center text-sm text-gray-500 mb-4">
+                            ← Scroll horizontally to view all columns →
+                        </div>
 
-                        >
-                            {/* TASK TITLE */}
-                            <Column
-                                field="task.title"
-                                header="Task Title"
-                                headerClassName="bg-gradient-to-b from-gray-50 to-gray-100 text-gray-800 font-bold py-6 text-lg border-r-2 border-gray-300"
-                                headerStyle={{ textAlign: "center" }}
-                                bodyClassName="px-6 py-6 text-left font-medium text-gray-800 border-r border-gray-200"
-                                body={(row) => <span className="font-semibold">{row.task.title}</span>}
-                                style={{ minWidth: "320px" }}
-                            />
+                        <div className="overflow-x-auto -mx-6 sm:-mx-8 px-6 sm:px-8">
+                            <DataTable
+                                value={tasks}
+                                emptyMessage={
+                                    <div className="text-center py-16 sm:py-20">
+                                        <p className="text-xl sm:text-2xl font-bold text-gray-500">No tasks yet</p>
+                                        <p className="text-base sm:text-lg text-gray-400 mt-2">Your applied and completed tasks will appear here</p>
+                                    </div>
+                                }
+                                className="rounded-2xl overflow-hidden"
+                                stripedRows
+                                rowHover
+                                tableStyle={{ minWidth: "50rem" }}
+                                scrollable
+                                scrollHeight="flexible"
+                            >
+                                {/* TASK TITLE */}
+                                <Column
+                                    field="task.title"
+                                    header="Task Title"
+                                    headerClassName="bg-gradient-to-b from-gray-50 to-gray-100 text-gray-800 font-bold py-5 sm:py-6 text-sm sm:text-lg text-center border-r-2 border-gray-300"
+                                    bodyClassName="px-4 sm:px-6 py-5 sm:py-6 text-left font-medium text-gray-800 text-sm sm:text-base border-r border-gray-200"
+                                    body={(row) => <span className="font-semibold">{row.task.title}</span>}
+                                    style={{ minWidth: "280px", width: "35%" }}
+                                />
 
-                            {/* LOCATION */}
-                            <Column
-                                field="task.location"
-                                header="Location"
-                                headerClassName="bg-gradient-to-b from-gray-50 to-gray-100 text-gray-800 font-bold text-center py-6 text-lg border-r-2 border-gray-300"
-                                bodyClassName="px-6 py-6 text-center text-gray-700 border-r border-gray-200"
-                                body={(row) => row.task.location || "Remote"}
-                            />
+                                {/* LOCATION */}
+                                <Column
+                                    field="task.location"
+                                    header="Location"
+                                    headerClassName="bg-gradient-to-b from-gray-50 to-gray-100 text-gray-800 font-bold py-5 sm:py-6 text-sm sm:text-lg text-center border-r-2 border-gray-300"
+                                    bodyClassName="px-4 sm:px-6 py-5 sm:py-6 text-center text-gray-700 text-sm sm:text-base border-r border-gray-200"
+                                    body={(row) => row.task.location || "Remote"}
+                                    style={{ minWidth: "140px", width: "20%" }}
+                                />
 
-                            {/* DEADLINE */}
-                            <Column
-                                field="task.end_date"
-                                header="Deadline"
-                                headerClassName="bg-gradient-to-b from-gray-50 to-gray-100 text-gray-800 font-bold py-6 text-lg border-r-2 border-gray-300"
-                                headerStyle={{ textAlign: "center" }}
-                                bodyClassName="px-6 py-6 text-center font-semibold text-gray-800 border-r border-gray-200"
-                                body={(row) => formatDate(row.task.end_date)}
-                            />
+                                {/* DEADLINE */}
+                                <Column
+                                    field="task.end_date"
+                                    header="Deadline"
+                                    headerClassName="bg-gradient-to-b from-gray-50 to-gray-100 text-gray-800 font-bold py-5 sm:py-6 text-sm sm:text-lg text-center border-r-2 border-gray-300"
+                                    bodyClassName="px-4 sm:px-6 py-5 sm:py-6 text-center font-semibold text-gray-800 text-sm sm:text-base border-r border-gray-200"
+                                    body={(row) => formatDate(row.task.end_date)}
+                                    style={{ minWidth: "140px", width: "15%" }}
+                                />
 
-                            {/* STATUS */}
-                            <Column
-                                field="status"
-                                header="Status"
-                                headerClassName="bg-gradient-to-b from-gray-50 to-gray-100 text-gray-800 font-bold text-center py-6 text-lg border-r-2 border-gray-300 last:border-r-0"
-                                bodyClassName="px-6 py-6 border-r border-gray-200 last:border-r-0"
-                                body={statusTemplate}
-                                style={{ minWidth: "180px" }}
-                            />
+                                {/* STATUS */}
+                                <Column
+                                    field="status"
+                                    header="Status"
+                                    headerClassName="bg-gradient-to-b from-gray-50 to-gray-100 text-gray-800 font-bold py-5 sm:py-6 text-sm sm:text-lg text-center border-r-2 border-gray-300 last:border-r-0"
+                                    bodyClassName="px-4 sm:px-6 py-5 sm:py-6 border-r border-gray-200 last:border-r-0"
+                                    body={statusTemplate}
+                                    style={{ minWidth: "160px", width: "15%" }}
+                                />
 
-                            {/* ACTION */}
-                            <Column
-                                header="Action"
-                                headerClassName="bg-gradient-to-b from-gray-50 to-gray-100 text-gray-800 font-bold text-center py-6 text-lg"
-                                bodyClassName="px-6 py-6 text-center"
-                                body={actionTemplate}
-                                style={{ minWidth: "200px" }}
-                            />
-                        </DataTable>
+                                {/* ACTION */}
+                                <Column
+                                    header="Action"
+                                    headerClassName="bg-gradient-to-b from-gray-50 to-gray-100 text-gray-800 font-bold py-5 sm:py-6 text-sm sm:text-lg text-center"
+                                    bodyClassName="px-4 sm:px-6 py-5 sm:py-6 text-center"
+                                    body={actionTemplate}
+                                    style={{ minWidth: "160px", width: "15%" }}
+                                />
+                            </DataTable>
+                        </div>
                     </div>
                 </div>
             </div>
 
             <div className="fixed inset-0 pointer-events-none -z-10 overflow-hidden">
-                <div className="absolute top-32 left-20 w-96 h-96 bg-teal-300 rounded-full mix-blend-multiply blur-3xl opacity-10"></div>
-                <div className="absolute bottom-20 right-20 w-80 h-80 bg-emerald-300 rounded-full mix-blend-multiply blur-3xl opacity-10"></div>
+                <div className="absolute top-32 left-20 w-96 h-96 bg-teal-300 rounded-full mix-blend-multiply blur-3xl opacity-10 animate-pulse"></div>
+                <div className="absolute bottom-20 right-20 w-80 h-80 bg-emerald-300 rounded-full mix-blend-multiply blur-3xl opacity-10 animate-pulse delay-1000"></div>
             </div>
         </div>
     );

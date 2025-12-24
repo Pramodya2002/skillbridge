@@ -1,6 +1,7 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { Tag } from "primereact/tag";
 import { Dropdown } from "primereact/dropdown";
+import { Toast } from "primereact/toast";
 import { useNavigate } from "react-router-dom";
 
 interface Skill {
@@ -62,25 +63,26 @@ const VolunteerMatches: React.FC = () => {
             .finally(() => setLoading(false));
     }, [volunteerId]);
 
-    if (!volunteerId) return <div className="text-center text-gray-500 text-xl">Please login as a volunteer to see matches.</div>;
+    if (!volunteerId) return <div className="text-center text-gray-500 text-xl py-20">Please login as a volunteer to see matches.</div>;
 
     return (
         <div className="space-y-8">
-            <h2 className="text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-teal-600 to-emerald-600 text-center">
+            <h2 className="text-4xl sm:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-teal-600 to-emerald-600 text-center">
                 Your Perfect Matches
             </h2>
 
             {loading ? (
                 <div className="text-center py-20">
-                    <i className="pi pi-spin pi-spinner text-6xl text-teal-600"></i>
+                    <i className="pi pi-spin pi-spinner text-5xl sm:text-6xl text-teal-600"></i>
                 </div>
             ) : matches.length === 0 ? (
-                <div className="text-center py-20 bg-white/60 backdrop-blur rounded-3xl border border-white/50">
-                    <p className="text-2xl font-bold text-gray-500">No perfect matches yet</p>
-                    <p className="text-gray-400 mt-2">Keep exploring — your ideal opportunity is coming!</p>
+                <div className="text-center py-16 sm:py-20 bg-white/60 backdrop-blur rounded-3xl border border-white/50">
+                    <p className="text-2xl sm:text-3xl font-bold text-gray-500">No perfect matches yet</p>
+                    <p className="text-lg text-gray-400 mt-4">Complete your profile with your skills, causes you care about, and availability
+                        to unlock personalized task recommendations tailored just for you!</p>
                 </div>
             ) : (
-                <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
+                <div className="grid gap-8 sm:grid-cols-2">
                     {matches.map((m) => (
                         <div
                             key={m.task.id}
@@ -88,13 +90,13 @@ const VolunteerMatches: React.FC = () => {
                         >
                             <div className="absolute inset-0 bg-gradient-to-br from-teal-500/10 to-emerald-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
 
-                            <div className="relative z-10 p-8">
-                                <div className="flex justify-between items-start mb-6">
-                                    <h3 className="text-3xl font-black text-teal-900 pr-4">{m.task.title}</h3>
-                                    <div className="relative">
+                            <div className="relative z-10 p-6 sm:p-8">
+                                <div className="flex flex-col sm:flex-row justify-between items-start gap-4 mb-6">
+                                    <h3 className="text-2xl sm:text-3xl font-black text-teal-900">{m.task.title}</h3>
+                                    <div className="relative flex-shrink-0">
                                         <Tag
                                             value={`${m.score}% Match`}
-                                            className={`px-8 py-4 text-2xl font-black rounded-full bg-gradient-to-r ${m.score >= 80 ? "from-emerald-500 to-teal-600" :
+                                            className={`px-6 sm:px-8 py-3 sm:py-4 text-xl sm:text-2xl font-black rounded-full bg-gradient-to-r ${m.score >= 80 ? "from-emerald-500 to-teal-600" :
                                                 m.score >= 60 ? "from-blue-500 to-cyan-600" :
                                                     "from-amber-500 to-orange-600"
                                                 } text-white shadow-2xl animate-pulse`}
@@ -103,37 +105,37 @@ const VolunteerMatches: React.FC = () => {
                                     </div>
                                 </div>
 
-                                <p className="text-gray-700 text-lg leading-relaxed mb-6">{m.task.description}</p>
+                                <p className="text-base sm:text-lg text-gray-700 leading-relaxed mb-6">{m.task.description}</p>
 
-                                <div className="flex flex-wrap gap-4 mb-6">
+                                <div className="flex flex-wrap gap-3 mb-6 text-sm sm:text-base">
                                     {m.task.location && (
-                                        <span className="px-5 py-3 bg-teal-100/80 backdrop-blur rounded-2xl text-teal-800 font-bold flex items-center gap-2">
+                                        <span className="px-4 py-2.5 bg-teal-100/80 backdrop-blur rounded-2xl text-teal-800 font-bold flex items-center gap-2">
                                             Location: {m.task.location}
                                         </span>
                                     )}
                                     {(m.task.start_date || m.task.end_date) && (
-                                        <span className="px-5 py-3 bg-amber-100/80 backdrop-blur rounded-2xl text-amber-800 font-bold">
+                                        <span className="px-4 py-2.5 bg-amber-100/80 backdrop-blur rounded-2xl text-amber-800 font-bold">
                                             Task Period: {formatDate(m.task.start_date)} ➡️ {formatDate(m.task.end_date)}
                                         </span>
                                     )}
                                     {m.task.required_skills && m.task.required_skills.length > 0 && (
-                                        <span className="px-5 py-3 bg-purple-100/80 backdrop-blur rounded-2xl text-purple-800 font-bold">
+                                        <span className="px-4 py-2.5 bg-purple-100/80 backdrop-blur rounded-2xl text-purple-800 font-bold">
                                             Skills: {m.task.required_skills.map(s => s.skill).join(" · ")}
                                         </span>
                                     )}
                                     {m.task.cause && (
-                                        <span className="px-5 py-3 bg-pink-100/80 backdrop-blur rounded-2xl text-pink-800 font-bold">
+                                        <span className="px-4 py-2.5 bg-pink-100/80 backdrop-blur rounded-2xl text-pink-800 font-bold">
                                             Cause: {m.task.cause}
                                         </span>
                                     )}
                                 </div>
 
                                 {m.reasons.length > 0 && (
-                                    <div className="bg-gradient-to-r from-teal-50 to-emerald-50 rounded-2xl p-6 border border-teal-200">
-                                        <p className="font-bold text-teal-800 mb-3">Why this is perfect for you:</p>
+                                    <div className="bg-gradient-to-r from-teal-50 to-emerald-50 rounded-2xl p-5 sm:p-6 border border-teal-200">
+                                        <p className="font-bold text-teal-800 mb-3 text-base sm:text-lg">Why this is perfect for you:</p>
                                         <ul className="space-y-2">
                                             {m.reasons.map((r, i) => (
-                                                <li key={i} className="flex items-start gap-3 text-gray-700">
+                                                <li key={i} className="flex items-start gap-3 text-gray-700 text-sm sm:text-base">
                                                     <span className="text-teal-600 mt-1">✅</span>
                                                     <span>{r}</span>
                                                 </li>
@@ -144,8 +146,13 @@ const VolunteerMatches: React.FC = () => {
 
                                 <div className="mt-8 flex justify-end">
                                     <button
-                                        onClick={() => navigate(`/dashboard/volunteer/tasks/${m.task.id}`)}
-                                        className="group/button relative px-10 py-5 bg-gradient-to-r from-teal-600 to-emerald-600 text-white font-bold text-xl rounded-2xl shadow-2xl hover:shadow-3xl transform hover:-translate-y-2 transition-all duration-300 overflow-hidden"
+                                        onClick={() => navigate(`/dashboard/volunteer/tasks/${m.task.id}`, {
+                                            state: {
+                                                score: m.score,
+                                                reasons: m.reasons
+                                            }
+                                        })}
+                                        className="group/button relative px-8 py-4 sm:px-10 sm:py-5 bg-gradient-to-r from-teal-600 to-emerald-600 text-white font-bold text-lg sm:text-xl rounded-2xl shadow-2xl hover:shadow-3xl transform hover:-translate-y-2 transition-all duration-300 overflow-hidden"
                                     >
                                         <span className="relative z-10 flex items-center gap-3">
                                             View Opportunity
@@ -163,6 +170,7 @@ const VolunteerMatches: React.FC = () => {
 };
 
 const VolunteerDashboardHome: React.FC = () => {
+    const toast = useRef<Toast>(null);
     const user = JSON.parse(localStorage.getItem("user") || "{}");
     const volunteerId = user?.volunteer_id || user?.id;
     const navigate = useNavigate();
@@ -174,17 +182,42 @@ const VolunteerDashboardHome: React.FC = () => {
     const [searchSkill, setSearchSkill] = useState("");
 
     useEffect(() => {
+        const hasSeenWelcome = localStorage.getItem("welcome_shown_volunteer");
+        if (user?.id && !hasSeenWelcome) {
+            toast.current?.show({
+                severity: "info",
+                summary: `Welcome, ${user.name || "Volunteer"}!`,
+                detail: "Please complete your profile to unlock personalized matches and apply to opportunities!",
+                life: 10000,
+                className: "text-lg",
+                contentClassName: "bg-gradient-to-r from-teal-500 to-emerald-600 text-white border-0",
+            });
+            localStorage.setItem("welcome_shown_volunteer", "true");
+        }
+    }, [user?.id]);
+
+    useEffect(() => {
         if (!volunteerId) return;
 
-        fetch("http://localhost:8000/api/tasks")
-            .then(res => res.json())
-            .then(data => {
-                const parsedTasks = data.map((t: any) => ({
+        fetch("http://localhost:8000/api/tasks/public")
+            .then(res => {
+                if (!res.ok) throw new Error("Failed to load tasks");
+                return res.json();
+            })
+            .then(response => {
+                const tasks = response.data || response;
+                const parsedTasks = tasks.map((t: any) => ({
                     ...t,
-                    required_skills: Array.isArray(t.required_skills) ? t.required_skills : JSON.parse(t.required_skills || "[]"),
+                    required_skills: Array.isArray(t.required_skills)
+                        ? t.required_skills
+                        : JSON.parse(t.required_skills || "[]"),
                     cause: t.cause || null,
                 }));
                 setAllTasks(parsedTasks);
+            })
+            .catch(err => {
+                console.error("Error loading public tasks:", err);
+                setAllTasks([]);
             });
 
         fetch(`http://localhost:8000/api/volunteers/${volunteerId}/applied-tasks`)
@@ -214,32 +247,34 @@ const VolunteerDashboardHome: React.FC = () => {
         });
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-teal-50 via-emerald-50 to-cyan-50 py-12 px-6">
-            <div className="text-center mb-16">
-                <h1 className="text-7xl font-black text-transparent bg-clip-text bg-gradient-to-r from-teal-600 to-emerald-600 mb-4">
+        <div className="min-h-screen bg-gradient-to-br from-teal-50 via-emerald-50 to-cyan-50 py-8 sm:py-12 px-4 sm:px-6">
+            <Toast ref={toast} position="top-center" />
+
+            <div className="text-center mb-12 sm:mb-16">
+                <h1 className="text-5xl sm:text-6xl lg:text-7xl font-black text-transparent bg-clip-text bg-gradient-to-r from-teal-600 to-emerald-600 mb-4">
                     Welcome back, {user.name || "Volunteer"}!
                 </h1>
-                <p className="text-2xl text-gray-700 font-medium">Your impact starts here</p>
+                <p className="text-xl sm:text-2xl text-gray-700 font-medium">Your impact starts here</p>
             </div>
 
-            <div className="max-w-7xl mx-auto mb-20">
-                <div className="bg-white/90 backdrop-blur-2xl rounded-3xl shadow-2xl border border-white/70 p-10 md:p-16">
+            <div className="max-w-7xl mx-auto mb-16 sm:mb-20">
+                <div className="bg-white/90 backdrop-blur-2xl rounded-3xl shadow-2xl border border-white/70 p-8 sm:p-10 md:p-16">
                     <VolunteerMatches />
                 </div>
             </div>
 
             <div className="max-w-7xl mx-auto">
-                <div className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/80 p-10 md:p-14">
-                    <h2 className="text-5xl font-black text-teal-800 text-center mb-12">
+                <div className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/80 p-8 sm:p-10 md:p-14">
+                    <h2 className="text-4xl sm:text-5xl font-black text-teal-800 text-center mb-10 sm:mb-12">
                         Explore All Opportunities
                     </h2>
 
-                    {/* Filters  */}
-                    <div className="max-w-6xl mx-auto mb-16">
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    {/* Filters */}
+                    <div className="max-w-6xl mx-auto mb-12 sm:mb-16">
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 sm:gap-8">
                             {/* Task Title Filter */}
                             <div className="group">
-                                <label className="block text-lg font-bold text-teal-800 mb-3 flex items-center gap-2">
+                                <label className="block text-base sm:text-lg font-bold text-teal-800 mb-3 flex items-center gap-2">
                                     <i className="pi pi-search text-teal-600"></i>
                                     Task Title
                                 </label>
@@ -250,7 +285,7 @@ const VolunteerDashboardHome: React.FC = () => {
                                     placeholder="Search by task title..."
                                     filter
                                     showClear={!!searchTitle}
-                                    className="w-full h-10 text-lg font-medium border-2 border-gray-300 rounded-2xl focus-within:border-teal-500 transition-all duration-300 shadow-sm hover:border-teal-400"
+                                    className="w-full h-12 text-base sm:text-lg font-medium border-2 border-gray-300 rounded-2xl focus-within:border-teal-500 transition-all duration-300 shadow-sm hover:border-teal-400"
                                     panelClassName="bg-white shadow-2xl border border-gray-200 rounded-2xl mt-2 overflow-hidden"
                                     itemTemplate={(option) => (
                                         <div className="p-3 hover:bg-teal-50 rounded-lg transition-colors cursor-pointer">
@@ -258,7 +293,7 @@ const VolunteerDashboardHome: React.FC = () => {
                                         </div>
                                     )}
                                     pt={{
-                                        input: { className: "h-full text-lg placeholder-gray-500" },
+                                        input: { className: "h-full placeholder-gray-500" },
                                         clearIcon: { className: "text-gray-400 hover:text-teal-600" }
                                     }}
                                 />
@@ -266,7 +301,7 @@ const VolunteerDashboardHome: React.FC = () => {
 
                             {/* Location Filter */}
                             <div className="group">
-                                <label className="block text-lg font-bold text-teal-800 mb-3 flex items-center gap-2">
+                                <label className="block text-base sm:text-lg font-bold text-teal-800 mb-3 flex items-center gap-2">
                                     <i className="pi pi-map-marker text-teal-600"></i>
                                     Location
                                 </label>
@@ -276,9 +311,9 @@ const VolunteerDashboardHome: React.FC = () => {
                                     onChange={(e) => setSearchLocation(e.value)}
                                     placeholder="Any location"
                                     showClear={!!searchLocation}
-                                    className="w-full h-10 text-lg font-medium border-2 border-gray-300 rounded-2xl focus-within:border-teal-500 transition-all duration-300 shadow-sm hover:border-teal-400"
+                                    className="w-full h-12 text-base sm:text-lg font-medium border-2 border-gray-300 rounded-2xl focus-within:border-teal-500 transition-all duration-300 shadow-sm hover:border-teal-400"
                                     pt={{
-                                        input: { className: "h-full text-lg placeholder-gray-500" }
+                                        input: { className: "h-full placeholder-gray-500" }
                                     }}
                                     panelClassName="bg-white shadow-2xl border border-gray-200 rounded-2xl mt-2"
                                 />
@@ -286,7 +321,7 @@ const VolunteerDashboardHome: React.FC = () => {
 
                             {/* Required Skill Filter */}
                             <div className="group">
-                                <label className="block text-lg font-bold text-teal-800 mb-3 flex items-center gap-2">
+                                <label className="block text-base sm:text-lg font-bold text-teal-800 mb-3 flex items-center gap-2">
                                     <i className="pi pi-star-fill text-purple-600"></i>
                                     Required Skill
                                 </label>
@@ -296,21 +331,19 @@ const VolunteerDashboardHome: React.FC = () => {
                                     onChange={(e) => setSearchSkill(e.value)}
                                     placeholder="Any skill"
                                     showClear={!!searchSkill}
-                                    className="w-full h-10 text-lg font-medium border-2 border-gray-300 rounded-2xl focus-within:border-teal-500 transition-all duration-300 shadow-sm hover:border-teal-400"
+                                    className="w-full h-12 text-base sm:text-lg font-medium border-2 border-gray-300 rounded-2xl focus-within:border-teal-500 transition-all duration-300 shadow-sm hover:border-teal-400"
                                     pt={{
-                                        input: { className: "h-full text-lg placeholder-gray-500" }
+                                        input: { className: "h-full placeholder-gray-500" }
                                     }}
                                     panelClassName="bg-white shadow-2xl border border-gray-200 rounded-2xl mt-2"
                                 />
                             </div>
                         </div>
 
-
-
                         {(searchTitle || searchLocation || searchSkill) && (
                             <div className="mt-8 flex flex-wrap gap-3 justify-center">
                                 {searchTitle && (
-                                    <div className="px-5 py-3 bg-gradient-to-r from-teal-500 to-emerald-500 text-white font-bold rounded-full shadow-lg flex items-center gap-3">
+                                    <div className="px-4 py-2.5 sm:px-5 sm:py-3 bg-gradient-to-r from-teal-500 to-emerald-500 text-white font-bold rounded-full shadow-lg flex items-center gap-3 text-sm sm:text-base">
                                         <span>Title: {searchTitle}</span>
                                         <button onClick={() => setSearchTitle("")} className="hover:scale-110 transition">
                                             <i className="pi pi-times-circle"></i>
@@ -318,7 +351,7 @@ const VolunteerDashboardHome: React.FC = () => {
                                     </div>
                                 )}
                                 {searchLocation && (
-                                    <div className="px-5 py-3 bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-bold rounded-full shadow-lg flex items-center gap-3">
+                                    <div className="px-4 py-2.5 sm:px-5 sm:py-3 bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-bold rounded-full shadow-lg flex items-center gap-3 text-sm sm:text-base">
                                         <span>Location: {searchLocation}</span>
                                         <button onClick={() => setSearchLocation("")} className="hover:scale-110 transition">
                                             <i className="pi pi-times-circle"></i>
@@ -326,7 +359,7 @@ const VolunteerDashboardHome: React.FC = () => {
                                     </div>
                                 )}
                                 {searchSkill && (
-                                    <div className="px-5 py-3 bg-gradient-to-r from-purple-500 to-pink-600 text-white font-bold rounded-full shadow-lg flex items-center gap-3">
+                                    <div className="px-4 py-2.5 sm:px-5 sm:py-3 bg-gradient-to-r from-purple-500 to-pink-600 text-white font-bold rounded-full shadow-lg flex items-center gap-3 text-sm sm:text-base">
                                         <span>Skill: {searchSkill}</span>
                                         <button onClick={() => setSearchSkill("")} className="hover:scale-110 transition">
                                             <i className="pi pi-times-circle"></i>
@@ -339,54 +372,51 @@ const VolunteerDashboardHome: React.FC = () => {
                                         setSearchLocation("");
                                         setSearchSkill("");
                                     }}
-                                    className="px-6 py-3 bg-gray-200 text-gray-700 font-bold rounded-full hover:bg-gray-300 transition"
+                                    className="px-5 py-2.5 sm:px-6 sm:py-3 bg-gray-200 text-gray-700 font-bold rounded-full hover:bg-gray-300 transition text-sm sm:text-base"
                                 >
                                     Clear All Filters
                                 </button>
                             </div>
                         )}
                     </div>
+
                     {/* Task Grid */}
-                    <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
+                    <div className="grid gap-8 sm:grid-cols-2">
                         {filteredTasks.length === 0 ? (
-                            <div className="col-span-full text-center py-20 bg-white/70 backdrop-blur rounded-3xl border border-gray-200/50">
-                                <p className="text-2xl font-bold text-gray-500">No tasks match your filters</p>
+                            <div className="col-span-full text-center py-16 sm:py-20 bg-white/70 backdrop-blur rounded-3xl border border-gray-200/50">
+                                <p className="text-2xl sm:text-3xl font-bold text-gray-500">No tasks match your filters</p>
                             </div>
                         ) : (
                             filteredTasks.map((t) => (
-
                                 <div
                                     key={t.id}
                                     className="group relative bg-white/80 backdrop-blur-2xl rounded-3xl shadow-2xl border border-white/50 overflow-hidden transform hover:scale-105 transition-all duration-500"
                                 >
                                     <div className="absolute inset-0 bg-gradient-to-br from-teal-500/10 to-emerald-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
 
-                                    <div className="relative z-10 p-8">
-                                        <div className="flex justify-between items-start mb-6">
-                                            <h3 className="text-3xl font-black text-teal-900 pr-4">{t.title}</h3>
+                                    <div className="relative z-10 p-6 sm:p-8">
+                                        <h3 className="text-2xl sm:text-3xl font-black text-teal-900 mb-6">{t.title}</h3>
 
-                                        </div>
+                                        <p className="text-base sm:text-lg text-gray-700 leading-relaxed mb-6">{t.description}</p>
 
-                                        <p className="text-gray-700 text-lg leading-relaxed mb-6">{t.description}</p>
-
-                                        <div className="flex flex-wrap gap-4 mb-6">
+                                        <div className="flex flex-wrap gap-3 mb-6 text-sm sm:text-base">
                                             {t.location && (
-                                                <span className="px-5 py-3 bg-teal-100/80 backdrop-blur rounded-2xl text-teal-800 font-bold flex items-center gap-2">
+                                                <span className="px-4 py-2.5 bg-teal-100/80 backdrop-blur rounded-2xl text-teal-800 font-bold">
                                                     Location: {t.location}
                                                 </span>
                                             )}
                                             {(t.start_date || t.end_date) && (
-                                                <span className="px-5 py-3 bg-amber-100/80 backdrop-blur rounded-2xl text-amber-800 font-bold">
+                                                <span className="px-4 py-2.5 bg-amber-100/80 backdrop-blur rounded-2xl text-amber-800 font-bold">
                                                     Task Period: {formatDate(t.start_date)} ➡️ {formatDate(t.end_date)}
                                                 </span>
                                             )}
                                             {t.required_skills && t.required_skills.length > 0 && (
-                                                <span className="px-5 py-3 bg-purple-100/80 backdrop-blur rounded-2xl text-purple-800 font-bold">
+                                                <span className="px-4 py-2.5 bg-purple-100/80 backdrop-blur rounded-2xl text-purple-800 font-bold">
                                                     Skills: {t.required_skills.map(s => s.skill).join(" · ")}
                                                 </span>
                                             )}
                                             {t.cause && (
-                                                <span className="px-5 py-3 bg-pink-100/80 backdrop-blur rounded-2xl text-pink-800 font-bold">
+                                                <span className="px-4 py-2.5 bg-pink-100/80 backdrop-blur rounded-2xl text-pink-800 font-bold">
                                                     Cause: {t.cause}
                                                 </span>
                                             )}
@@ -395,7 +425,7 @@ const VolunteerDashboardHome: React.FC = () => {
                                         <div className="mt-8 flex justify-end">
                                             <button
                                                 onClick={() => navigate(`/dashboard/volunteer/tasks/${t.id}`)}
-                                                className="group/button relative px-10 py-5 bg-gradient-to-r from-teal-600 to-emerald-600 text-white font-bold text-xl rounded-2xl shadow-2xl hover:shadow-3xl transform hover:-translate-y-2 transition-all duration-300 overflow-hidden"
+                                                className="group/button relative px-8 py-4 sm:px-10 sm:py-5 bg-gradient-to-r from-teal-600 to-emerald-600 text-white font-bold text-lg sm:text-xl rounded-2xl shadow-2xl hover:shadow-3xl transform hover:-translate-y-2 transition-all duration-300 overflow-hidden"
                                             >
                                                 <span className="relative z-10 flex items-center gap-3">
                                                     View Opportunity
@@ -410,7 +440,7 @@ const VolunteerDashboardHome: React.FC = () => {
                     </div>
                 </div>
             </div>
-        </div >
+        </div>
     );
 };
 

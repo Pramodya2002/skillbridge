@@ -1,6 +1,7 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState } from "react";
 import { Toast } from "primereact/toast";
 import Select from "react-select";
+import { useRef } from "react";
 
 type OptionType = { value: string; label: string };
 
@@ -136,8 +137,8 @@ const NonprofitProfile: React.FC = () => {
             borderRadius: "1.5rem",
             padding: "1rem",
             boxShadow: "0 10px 40px rgba(0,0,0,0.08)",
-            fontSize: "1.1rem",
             "&:hover": { borderColor: "#14b8a6" },
+            fontSize: "1.1rem",
         }),
         placeholder: (base: any) => ({
             ...base,
@@ -174,48 +175,48 @@ const NonprofitProfile: React.FC = () => {
         return (
             <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-teal-50 to-emerald-50">
                 <div className="text-center">
-                    <i className="pi pi-spin pi-spinner text-8xl text-teal-600 mb-8"></i>
-                    <p className="text-3xl font-bold text-gray-700">Loading your profile...</p>
+                    <i className="pi pi-spin pi-spinner text-6xl sm:text-8xl text-teal-600 mb-8"></i>
+                    <p className="text-2xl sm:text-3xl font-bold text-gray-700">Loading your profile...</p>
                 </div>
             </div>
         );
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-teal-50 via-emerald-50 to-cyan-50 py-16 px-6 relative overflow-hidden">
+        <div className="min-h-screen bg-gradient-to-br from-teal-50 via-emerald-50 to-cyan-50 py-8 sm:py-16 px-4 sm:px-6 relative overflow-hidden">
             <Toast ref={toast} position="top-right" />
 
             <div className="fixed inset-0 pointer-events-none -z-10">
-                <div className="absolute top-20 left-20 w-96 h-96 bg-teal-400 rounded-full mix-blend-multiply blur-3xl opacity-25 animate-pulse"></div>
-                <div className="absolute bottom-32 right-32 w-80 h-80 bg-emerald-500 rounded-full mix-blend-multiply blur-3xl opacity-25 animate-pulse delay-1000"></div>
+                <div className="absolute top-20 left-20 w-80 sm:w-96 h-80 sm:h-96 bg-teal-400 rounded-full mix-blend-multiply blur-3xl opacity-25 animate-pulse"></div>
+                <div className="absolute bottom-32 right-32 w-72 sm:w-80 h-72 sm:h-80 bg-emerald-500 rounded-full mix-blend-multiply blur-3xl opacity-25 animate-pulse delay-1000"></div>
             </div>
 
             <div className="max-w-6xl mx-auto">
                 {/* Hero Header */}
-                <div className="text-center mb-16">
-                    <h1 className="text-7xl md:text-8xl font-black text-transparent bg-clip-text bg-gradient-to-r from-teal-600 to-emerald-600 leading-tight">
+                <div className="text-center mb-10 sm:mb-16">
+                    <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-black text-transparent bg-clip-text bg-gradient-to-r from-teal-600 to-emerald-600 leading-tight break-words px-4">
                         Your Organization Profile
                     </h1>
-                    <p className="text-2xl md:text-3xl text-gray-700 mt-6 font-medium max-w-4xl mx-auto">
+                    <p className="text-xl sm:text-2xl md:text-3xl text-gray-700 mt-6 font-medium max-w-4xl mx-auto px-4">
                         This is how volunteers see your mission. Make it inspiring.
                     </p>
                 </div>
 
                 {/* Main Profile Card */}
-                <div className="bg-white/80 backdrop-blur-3xl rounded-3xl shadow-2xl border border-white/60 p-10 md:p-16 overflow-hidden">
-                    <form onSubmit={handleSubmit} className="space-y-12">
+                <div className="bg-white/80 backdrop-blur-3xl rounded-3xl shadow-2xl border border-white/60 p-8 sm:p-10 md:p-16">
+                    <form onSubmit={handleSubmit} className="space-y-10 sm:space-y-12">
                         {/* Personal Info */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 sm:gap-10">
                             <div className="relative">
                                 <input
                                     id="name"
                                     value={nonprofit.name}
                                     onChange={handleChange}
-                                    className="peer w-full px-8 py-7 bg-white/90 backdrop-blur-xl border-2 border-gray-300/70 rounded-2xl text-gray-900 font-medium placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-teal-500/40 focus:border-teal-600 transition-all duration-300 text-xl shadow-inner"
+                                    className="peer w-full px-6 sm:px-8 py-5 sm:py-7 bg-white/90 backdrop-blur-xl border-2 border-gray-300/70 rounded-2xl text-gray-900 font-medium placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-teal-500/40 focus:border-teal-600 transition-all duration-300 text-lg sm:text-xl shadow-inner"
                                     placeholder=" "
                                     required
                                 />
-                                <label className="absolute left-8 -top-5 px-4 bg-white text-xl font-bold text-teal-700 pointer-events-none transition-all duration-300 peer-focus:-top-5 peer-focus:text-teal-700 peer-placeholder-shown:top-7 peer-placeholder-shown:text-gray-500">
+                                <label className="absolute left-6 sm:left-8 -top-3 sm:-top-5 px-3 sm:px-4 bg-white text-base sm:text-xl font-bold text-teal-700 pointer-events-none transition-all duration-300 peer-focus:-top-3 sm:peer-focus:-top-5 peer-focus:text-teal-700 peer-placeholder-shown:top-5 sm:peer-placeholder-shown:top-7 peer-placeholder-shown:text-gray-500">
                                     Admin Full Name *
                                 </label>
                             </div>
@@ -226,27 +227,27 @@ const NonprofitProfile: React.FC = () => {
                                     type="email"
                                     value={nonprofit.email}
                                     onChange={handleChange}
-                                    className="peer w-full px-8 py-7 bg-white/90 backdrop-blur-xl border-2 border-gray-300/70 rounded-2xl text-gray-900 font-medium placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-teal-500/40 focus:border-teal-600 transition-all duration-300 text-xl shadow-inner"
+                                    className="peer w-full px-6 sm:px-8 py-5 sm:py-7 bg-white/90 backdrop-blur-xl border-2 border-gray-300/70 rounded-2xl text-gray-900 font-medium placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-teal-500/40 focus:border-teal-600 transition-all duration-300 text-lg sm:text-xl shadow-inner"
                                     placeholder=" "
                                     required
                                 />
-                                <label className="absolute left-8 -top-5 px-4 bg-white text-xl font-bold text-teal-700 pointer-events-none transition-all duration-300 peer-focus:-top-5 peer-focus:text-teal-700 peer-placeholder-shown:top-7 peer-placeholder-shown:text-gray-500">
+                                <label className="absolute left-6 sm:left-8 -top-3 sm:-top-5 px-3 sm:px-4 bg-white text-base sm:text-xl font-bold text-teal-700 pointer-events-none transition-all duration-300 peer-focus:-top-3 sm:peer-focus:-top-5 peer-focus:text-teal-700 peer-placeholder-shown:top-5 sm:peer-placeholder-shown:top-7 peer-placeholder-shown:text-gray-500">
                                     Email Address *
                                 </label>
                             </div>
                         </div>
 
                         {/* Organization Info */}
-                        <div className="space-y-10">
+                        <div className="space-y-8 sm:space-y-10">
                             <div className="relative">
                                 <input
                                     id="org_name"
                                     value={nonprofit.org_name || ""}
                                     onChange={handleChange}
-                                    className="peer w-full px-8 py-7 bg-gradient-to-r from-teal-50 to-emerald-50 backdrop-blur-xl border-2 border-teal-300 rounded-2xl text-teal-900 font-bold placeholder-teal-500 focus:outline-none focus:ring-4 focus:ring-teal-500/50 focus:border-teal-600 transition-all duration-300 text-2xl shadow-inner"
+                                    className="peer w-full px-6 sm:px-8 py-5 sm:py-7 bg-gradient-to-r from-teal-50 to-emerald-50 backdrop-blur-xl border-2 border-teal-300 rounded-2xl text-teal-900 font-bold placeholder-teal-500 focus:outline-none focus:ring-4 focus:ring-teal-500/50 focus:border-teal-600 transition-all duration-300 text-xl sm:text-2xl shadow-inner"
                                     placeholder=" "
                                 />
-                                <label className="absolute left-8 -top-5 px-4 bg-white text-xl font-black text-teal-800 pointer-events-none transition-all duration-300 peer-focus:-top-5 peer-focus:text-teal-800 peer-placeholder-shown:top-7 peer-placeholder-shown:text-teal-60" >
+                                <label className="absolute left-6 sm:left-8 -top-3 sm:-top-5 px-3 sm:px-4 bg-white text-base sm:text-xl font-black text-teal-800 pointer-events-none transition-all duration-300 peer-focus:-top-3 sm:peer-focus:-top-5 peer-focus:text-teal-800 peer-placeholder-shown:top-5 sm:peer-placeholder-shown:top-7 peer-placeholder-shown:text-teal-600">
                                     Organization Name
                                 </label>
                             </div>
@@ -257,38 +258,38 @@ const NonprofitProfile: React.FC = () => {
                                     value={nonprofit.mission || ""}
                                     onChange={handleChange}
                                     rows={5}
-                                    className="peer w-full px-8 py-7 bg-white/90 backdrop-blur-xl border-2 border-gray-300/70 rounded-2xl text-gray-800 font-medium placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-emerald-500/40 focus:border-emerald-600 transition-all duration-300 text-lg shadow-inner resize-none"
+                                    className="peer w-full px-6 sm:px-8 py-5 sm:py-7 bg-white/90 backdrop-blur-xl border-2 border-gray-300/70 rounded-2xl text-gray-800 font-medium placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-emerald-500/40 focus:border-emerald-600 transition-all duration-300 text-base sm:text-lg shadow-inner resize-none"
                                     placeholder=" "
                                 />
-                                <label className="absolute left-8 -top-5 px-4 bg-white text-xl font-bold text-emerald-700 pointer-events-none transition-all duration-300 peer-focus:-top-5 peer-focus:text-emerald-700 peer-placeholder-shown:top-7 peer-placeholder-shown:text-gray-500">
+                                <label className="absolute left-6 sm:left-8 -top-3 sm:-top-5 px-3 sm:px-4 bg-white text-base sm:text-xl font-bold text-emerald-700 pointer-events-none transition-all duration-300 peer-focus:-top-3 sm:peer-focus:-top-5 peer-focus:text-emerald-700 peer-placeholder-shown:top-5 sm:peer-placeholder-shown:top-7 peer-placeholder-shown:text-gray-500">
                                     Mission Statement
                                 </label>
                             </div>
 
                             <div>
-                                <label className="block text-2xl font-black text-teal-800 mb-6">Primary Focus Area</label>
+                                <label className="block text-xl sm:text-2xl font-black text-teal-800 mb-4 sm:mb-6">Primary Focus Area</label>
                                 <Select
                                     options={causeOptions}
                                     value={causeOptions.find(opt => opt.value === nonprofit.focus_area) || null}
                                     onChange={handleSelectChange}
                                     placeholder="Choose your cause..."
                                     styles={customSelectStyles}
-                                    className="text-lg"
+                                    className="text-base sm:text-lg"
                                 />
                             </div>
                         </div>
 
                         {/* Contact & Links */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 sm:gap-10">
                             <div className="relative">
                                 <input
                                     id="website"
                                     value={nonprofit.website || ""}
                                     onChange={handleChange}
-                                    className="peer w-full px-8 py-7 bg-white/90 backdrop-blur-xl border-2 border-gray-300/70 rounded-2xl text-gray-900 font-medium placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-cyan-500/40 focus:border-cyan-600 transition-all duration-300 text-xl shadow-inner"
+                                    className="peer w-full px-6 sm:px-8 py-5 sm:py-7 bg-white/90 backdrop-blur-xl border-2 border-gray-300/70 rounded-2xl text-gray-900 font-medium placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-cyan-500/40 focus:border-cyan-600 transition-all duration-300 text-lg sm:text-xl shadow-inner"
                                     placeholder=" "
                                 />
-                                <label className="absolute left-8 -top-5 px-4 bg-white text-xl font-bold text-cyan-700 pointer-events-none transition-all duration-300 peer-focus:-top-5 peer-focus:text-cyan-700 peer-placeholder-shown:top-7 peer-placeholder-shown:text-gray-500">
+                                <label className="absolute left-6 sm:left-8 -top-3 sm:-top-5 px-3 sm:px-4 bg-white text-base sm:text-xl font-bold text-cyan-700 pointer-events-none transition-all duration-300 peer-focus:-top-3 sm:peer-focus:-top-5 peer-focus:text-cyan-700 peer-placeholder-shown:top-5 sm:peer-placeholder-shown:top-7 peer-placeholder-shown:text-gray-500">
                                     Website URL
                                 </label>
                             </div>
@@ -298,38 +299,38 @@ const NonprofitProfile: React.FC = () => {
                                     id="contact_name"
                                     value={nonprofit.contact_name || ""}
                                     onChange={handleChange}
-                                    className="peer w-full px-8 py-7 bg-white/90 backdrop-blur-xl border-2 border-gray-300/70 rounded-2xl text-gray-900 font-medium placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-purple-500/40 focus:border-purple-600 transition-all duration-300 text-xl shadow-inner"
+                                    className="peer w-full px-6 sm:px-8 py-5 sm:py-7 bg-white/90 backdrop-blur-xl border-2 border-gray-300/70 rounded-2xl text-gray-900 font-medium placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-purple-500/40 focus:border-purple-600 transition-all duration-300 text-lg sm:text-xl shadow-inner"
                                     placeholder=" "
                                     required
                                 />
-                                <label className="absolute left-8 -top-5 px-4 bg-white text-xl font-bold text-purple-700 pointer-events-none transition-all duration-300 peer-focus:-top-5 peer-focus:text-purple-700 peer-placeholder-shown:top-7 peer-placeholder-shown:text-gray-500">
+                                <label className="absolute left-6 sm:left-8 -top-3 sm:-top-5 px-3 sm:px-4 bg-white text-base sm:text-xl font-bold text-purple-700 pointer-events-none transition-all duration-300 peer-focus:-top-3 sm:peer-focus:-top-5 peer-focus:text-purple-700 peer-placeholder-shown:top-5 sm:peer-placeholder-shown:top-7 peer-placeholder-shown:text-gray-500">
                                     Contact Person Name *
                                 </label>
                             </div>
 
-                            <div className="relative">
+                            <div className="relative md:col-span-2">
                                 <input
                                     id="contact_email"
                                     type="email"
                                     value={nonprofit.contact_email || ""}
                                     onChange={handleChange}
-                                    className="peer w-full px-8 py-7 bg-white/90 backdrop-blur-xl border-2 border-gray-300/70 rounded-2xl text-gray-900 font-medium placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-purple-500/40 focus:border-purple-600 transition-all duration-300 text-xl shadow-inner"
+                                    className="peer w-full px-6 sm:px-8 py-5 sm:py-7 bg-white/90 backdrop-blur-xl border-2 border-gray-300/70 rounded-2xl text-gray-900 font-medium placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-purple-500/40 focus:border-purple-600 transition-all duration-300 text-lg sm:text-xl shadow-inner"
                                     placeholder=" "
                                 />
-                                <label className="absolute left-8 -top-5 px-4 bg-white text-xl font-bold text-purple-700 pointer-events-none transition-all duration-300 peer-focus:-top-5 peer-focus:text-purple-700 peer-placeholder-shown:top-7 peer-placeholder-shown:text-gray-500">
+                                <label className="absolute left-6 sm:left-8 -top-3 sm:-top-5 px-3 sm:px-4 bg-white text-base sm:text-xl font-bold text-purple-700 pointer-events-none transition-all duration-300 peer-focus:-top-3 sm:peer-focus:-top-5 peer-focus:text-purple-700 peer-placeholder-shown:top-5 sm:peer-placeholder-shown:top-7 peer-placeholder-shown:text-gray-500">
                                     Public Contact Email
                                 </label>
                             </div>
                         </div>
 
                         {/* Save Button */}
-                        <div className="flex justify-center pt-10">
+                        <div className="flex justify-center pt-8 sm:pt-10">
                             <button
                                 type="submit"
-                                className="group relative px-24 py-8 bg-gradient-to-r from-teal-600 to-emerald-600 text-white font-black text-4xl rounded-full shadow-2xl hover:shadow-3xl transform hover:-translate-y-4 transition-all duration-500 overflow-hidden"
+                                className="group relative px-20 sm:px-24 py-6 sm:py-8 bg-gradient-to-r from-teal-600 to-emerald-600 text-white font-black text-3xl sm:text-4xl rounded-full shadow-2xl hover:shadow-3xl transform hover:-translate-y-4 transition-all duration-500 overflow-hidden"
                             >
-                                <span className="relative z-10 flex items-center gap-6">
-                                    <i className="pi pi-save text-5xl"></i>
+                                <span className="relative z-10 flex items-center gap-4 sm:gap-6">
+                                    <i className="pi pi-save text-4xl sm:text-5xl"></i>
                                     Save Profile
                                 </span>
                                 <div className="absolute inset-0 bg-white/30 scale-0 group-hover:scale-150 transition-transform duration-700 rounded-full"></div>
@@ -338,11 +339,11 @@ const NonprofitProfile: React.FC = () => {
                     </form>
                 </div>
 
-                <div className="text-center mt-20">
-                    <p className="text-4xl font-bold text-teal-800">
+                <div className="text-center mt-16 sm:mt-20">
+                    <p className="text-3xl sm:text-4xl font-bold text-teal-800">
                         Your story inspires action.
                     </p>
-                    <p className="text-2xl text-gray-600 mt-4">
+                    <p className="text-xl sm:text-2xl text-gray-600 mt-4">
                         Every detail here helps volunteers choose to join your mission.
                     </p>
                 </div>

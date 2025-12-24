@@ -5,19 +5,42 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Task;
+use Illuminate\Support\Facades\Auth;
 
 class TaskController extends Controller
 {
-    public function index()
+   public function index()
     {
-        $tasks = Task::withCount('applications')->get();
+        $user = auth('api')->user();
 
-        return response()->json($tasks);
+        if (!$user || $user->role !== 'nonprofit') {
+            return response()->json([
+                'error' => 'Unauthorized. Only nonprofit users can view their tasks.'
+            ], 401);
+        }
+
+        $tasks = Task::withCount('applications')
+                    ->where('nonprofit_id', $user->id)
+                    ->latest()          
+                    ->get();
+
+        return response()->json([
+            'data' => $tasks
+        ]);
     }
 
 
     public function store(Request $request)
     {
+
+        $user = auth('api')->user();
+        
+        if (!$user || $user->role !== 'nonprofit') {
+            return response()->json([
+                'error' => 'Unauthorized. Only nonprofit accounts can create tasks.'
+            ], 401);
+        }
+
         $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'required|string',
@@ -40,7 +63,8 @@ class TaskController extends Controller
             'required_skills',
             'volunteers_needed',
             'status',
-        ]));
+        ]) + ['nonprofit_id' => $user->id]
+    );
 
 
         return response()->json($task, 201);
@@ -77,6 +101,19 @@ class TaskController extends Controller
         }
 
         return response()->json(['message' => 'Applied successfully'], 200);
+    }
+
+
+    public function publicIndex()
+    {
+        $tasks = Task::withCount('applications')
+                    ->where('status', 'Open')  
+                    ->latest()
+                    ->get();
+
+        return response()->json([
+            'data' => $tasks
+        ]);
     }
 
 

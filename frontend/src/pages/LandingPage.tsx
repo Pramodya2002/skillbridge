@@ -26,50 +26,54 @@ const LandingPage: React.FC = () => {
         <div className="landing font-sans overflow-x-hidden">            <Header />
 
             {/* Hero Section */}
-            <section id="hero" className="relative min-h-screen flex items-center justify-center bg-gradient-to-br from-teal-50 via-gray-50 to-emerald-50">
+            <section id="hero" className="relative min-h-screen bg-gradient-to-br from-teal-50 via-gray-50 to-emerald-50 py-16 md:py-20">
                 <div className="absolute inset-0 bg-teal-600 opacity-5"></div>
-                <div className="relative max-w-7xl mx-auto px-6 lg:px-12 grid lg:grid-cols-2 gap-12 items-center">
-                    <div className="space-y-8 z-10">
-                        <div className="inline-block">
-                            <h1 className="text-5xl lg:text-7xl font-black text-teal-900 leading-tight">
-                                Connect Skills
-                                <span className="block text-teal-600">with Purpose</span>
-                            </h1>
-                            <div className="h-1 w-32 bg-gradient-to-r from-teal-600 to-emerald-500 mt-4 rounded-full"></div>
+
+                <div className="relative max-w-7xl mx-auto px-6 lg:px-12">
+                    <div className="grid lg:grid-cols-2 gap-12 pt-24 md:pt-32 lg:pt-40 min-h-screen lg:min-h-0">
+                        {/* Text Column */}
+                        <div className="space-y-8 z-10">
+                            <div className="inline-block">
+                                <h1 className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-black text-teal-900 leading-tight">
+                                    Connect Skills
+                                    <span className="block text-teal-600">with Purpose</span>
+                                </h1>
+                                <div className="h-1 w-32 bg-gradient-to-r from-teal-600 to-emerald-500 mt-4 rounded-full"></div>
+                            </div>
+
+                            <p className="text-lg sm:text-xl text-gray-700 leading-relaxed max-w-lg">
+                                Bridge the gap between talented volunteers and meaningful nonprofit opportunities.
+                                Make an impact with your skills and contribute to causes that matter.
+                            </p>
+
+                            <div className="flex flex-wrap gap-5 pt-6">
+                                <Link
+                                    to="/login"
+                                    className="group px-8 py-4 bg-teal-600 text-white font-bold text-lg rounded-2xl shadow-xl hover:shadow-2xl transform hover:-translate-y-2 transition-all duration-300 flex items-center gap-3"
+                                >
+                                    Login
+                                    <span className="group-hover:translate-x-2 transition-transform">→</span>
+                                </Link>
+                                <Link
+                                    to="/register"
+                                    className="px-8 py-4 bg-white text-teal-700 font-bold text-lg rounded-2xl border-4 border-teal-600 shadow-lg hover:bg-teal-600 hover:text-white transform hover:-translate-y-2 transition-all duration-300"
+                                >
+                                    Register Now
+                                </Link>
+                            </div>
                         </div>
 
-                        <p className="text-xl text-gray-700 leading-relaxed max-w-lg">
-                            Bridge the gap between talented volunteers and meaningful nonprofit opportunities.
-                            Make an impact with your skills and contribute to causes that matter.
-                        </p>
-
-                        <div className="flex flex-wrap gap-5 pt-6">
-                            <Link
-                                to="/login"
-                                className="group px-8 py-4 bg-teal-600 text-white font-bold text-lg rounded-2xl shadow-xl hover:shadow-2xl transform hover:-translate-y-2 transition-all duration-300 flex items-center gap-3"
-                            >
-                                Login
-                                <span className="group-hover:translate-x-2 transition-transform">→</span>
-                            </Link>
-                            <Link
-                                to="/register"
-                                className="px-8 py-4 bg-white text-teal-700 font-bold text-lg rounded-2xl border-4 border-teal-600 shadow-lg hover:bg-teal-600 hover:text-white transform hover:-translate-y-2 transition-all duration-300"
-                            >
-                                Register Now
-                            </Link>
+                        {/* Image Column */}
+                        <div className="relative flex justify-center pb-10 lg:pb-0">
+                            <div className="absolute inset-0 bg-gradient-to-tr from-teal-400 to-emerald-400 blur-3xl opacity-30 scale-125"></div>
+                            <img
+                                src={headerimage}
+                                alt="Impact in action"
+                                className="relative z-10 w-full max-w-md lg:max-w-lg rounded-[40%_60%_50%_50% / 30%_40%_60%_70%] shadow-2xl ring-8 ring-white/50 hover:scale-105 transition-transform duration-700"
+                            />
                         </div>
-                    </div>
-
-                    <div className="relative flex justify-center">
-                        <div className="absolute inset-0 bg-gradient-to-tr from-teal-400 to-emerald-400 blur-3xl opacity-30 scale-125"></div>
-                        <img
-                            src={headerimage}
-                            alt="Impact in action"
-                            className="relative z-10 w-full max-w-lg rounded-[40%_60%_50%_50% / 30%_40%_60%_70%] shadow-2xl ring-8 ring-white/50 hover:scale-105 transition-transform duration-700"
-                        />
                     </div>
                 </div>
-
 
                 <div className="absolute top-20 left-10 w-72 h-72 bg-teal-400 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse"></div>
                 <div className="absolute bottom-20 right-10 w-96 h-96 bg-emerald-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse delay-1000"></div>

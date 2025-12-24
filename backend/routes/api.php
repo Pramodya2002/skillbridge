@@ -17,11 +17,12 @@ Route::middleware(\App\Http\Middleware\Cors::class)->group(function () {
     Route::post('/login', [LoginController::class, 'login']);
     Route::post('/logout', [LoginController::class, 'logout']);
 
-
+    Route::get('/tasks/public', [TaskController::class, 'publicIndex']);
     Route::get('/tasks', [TaskController::class, 'index']);
     Route::post('/tasks', [TaskController::class, 'store']);
     Route::get('/tasks/{id}', [App\Http\Controllers\Api\TaskController::class, 'show']);
     Route::post('/tasks/{id}/apply', [App\Http\Controllers\Api\TaskController::class, 'apply']);
+
 
 
     Route::get('/volunteers/{id}/matched-tasks', [\App\Http\Controllers\Api\MatchingController::class, 'index']);
@@ -33,6 +34,8 @@ Route::middleware(\App\Http\Middleware\Cors::class)->group(function () {
     Route::get('/volunteers/{id}', [VolunteerController::class, 'show']);
     Route::get('/tasks/{id}/applications', [TaskApplicationController::class, 'byTask']);
     Route::post('/task-applications/{id}/update-status', [TaskApplicationController::class, 'updateStatus']);
+
+    Route::delete('/task-applications/{id}', [TaskApplicationController::class, 'withdraw']);
 });
 
 
