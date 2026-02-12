@@ -44,7 +44,7 @@ const levelOptions: OptionType[] = [
 const statuses = [
     { label: "Open for Applications", value: "Open" },
     { label: "In Progress", value: "Ongoing" },
-    { label: "Completed", value: "Completed" },
+
 ];
 
 const NonprofitCreateTask: React.FC = () => {
@@ -68,14 +68,18 @@ const NonprofitCreateTask: React.FC = () => {
 
 
     const dateTemplate = (date: any) => {
-        const currentDate = new Date();
         const today = new Date();
         today.setHours(0, 0, 0, 0);
 
+        const dateObj = new Date(date.year, date.month, date.day);
+        dateObj.setHours(0, 0, 0, 0);
+
+        const isPastDate = dateObj < today;
+
         const isToday =
-            date.day === currentDate.getDate() &&
-            date.month === currentDate.getMonth() &&
-            date.year === currentDate.getFullYear();
+            date.day === today.getDate() &&
+            date.month === today.getMonth() &&
+            date.year === today.getFullYear();
 
         const isSelected =
             (startDate &&
@@ -88,23 +92,22 @@ const NonprofitCreateTask: React.FC = () => {
                 date.year === endDate.getFullYear());
 
 
-        const isOtherMonth = date.month !== currentDate.getMonth();
-
-
-        const dateObj = new Date(date.year, date.month, date.day);
-        const isPastDate = dateObj < today;
-
-        const textColor = isOtherMonth || isPastDate
+        const textColor = isPastDate
             ? "text-gray-400"
-            : "text-gray-700";
+            : "text-gray-800 font-medium";
 
         return (
             <span
-                className={`w-9 h-9 flex items-center justify-center rounded-full text-sm font-medium transition-all
-                ${isToday ? "bg-teal-600 text-white" : ""}
-                ${isSelected ? "bg-emerald-500 text-white" : ""}
+                className={`
+                w-9 h-9 flex items-center justify-center rounded-full 
+                text-sm transition-all duration-200
+                ${isToday ? "bg-teal-600 text-white font-bold" : ""}
+                ${isSelected ? "bg-emerald-500 text-white font-bold ring-2 ring-emerald-300" : ""}
                 ${textColor}
-                ${!isOtherMonth && !isPastDate ? "hover:bg-teal-100 cursor-pointer" : "cursor-not-allowed"}`}
+                ${!isPastDate
+                        ? "hover:bg-teal-50 hover:text-teal-700 cursor-pointer"
+                        : "cursor-not-allowed opacity-60"}
+            `}
             >
                 {date.day}
             </span>
@@ -318,8 +321,27 @@ const NonprofitCreateTask: React.FC = () => {
                                         min="1"
                                         required
                                     />
-                                    <label className="absolute left-6 sm:left-8 -top-3 sm:-top-4 px-3 sm:px-4 bg-white text-base sm:text-lg font-bold text-teal-700 pointer-events-none transition-all duration-300 peer-focus:-top-3 sm:peer-focus:-top-4 peer-focus:text-teal-700 peer-placeholder-shown:top-5 sm:peer-placeholder-shown:top-6 peer-placeholder-shown:text-gray-500">
-                                        Volunteers Needed *
+                                    <label
+                                        className="
+            absolute left-6 sm:left-8 
+            -top-3 sm:-top-4 
+            px-3 sm:px-4 
+            bg-white 
+            text-sm sm:text-base          
+            font-bold text-teal-700 
+            pointer-events-none 
+            transition-all duration-300 
+            peer-focus:-top-3 sm:peer-focus:-top-4 
+            peer-focus:text-teal-700 
+            peer-focus:text-sm sm:peer-focus:text-base 
+            peer-placeholder-shown:top-5 sm:peer-placeholder-shown:top-6 
+            peer-placeholder-shown:text-base sm:peer-placeholder-shown:text-lg 
+            peer-placeholder-shown:text-gray-500
+            peer-not-placeholder-shown:left-4 sm:peer-not-placeholder-shown:left-6  
+            peer-not-placeholder-shown:scale-90 sm:peer-not-placeholder-shown:scale-100   
+        "
+                                    >
+                                        Volunteers No.*
                                     </label>
                                 </div>
                             </div>

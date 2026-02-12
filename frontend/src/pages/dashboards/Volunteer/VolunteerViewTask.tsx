@@ -108,7 +108,7 @@ const VolunteerViewTask: React.FC = () => {
             });
 
             setShowConfirm(false);
-            setTimeout(() => navigate("/dashboard/volunteer"), 2000);
+            setTimeout(() => navigate("/dashboard/volunteer/tasks"), 2000);
         } catch (error: any) {
             toast.current?.show({
                 severity: "error",
@@ -352,7 +352,7 @@ const VolunteerViewTask: React.FC = () => {
                 }}
             >
                 <div className="p-8 sm:p-10 text-center space-y-8 sm:space-y-10 -mt-4 sm:-mt-6">
-                    <i className="pi pi-heart-fill text-7xl sm:text-9xl text-teal-600 animate-pulse"></i>
+                    <i className="pi pi-link text-7xl sm:text-9xl text-teal-600 animate-pulse"></i>
 
                     <div className="space-y-5 sm:space-y-6">
                         <p className="text-xl sm:text-2xl font-bold text-gray-800">You're applying for:</p>
