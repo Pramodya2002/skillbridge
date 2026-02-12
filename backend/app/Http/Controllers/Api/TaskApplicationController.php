@@ -61,7 +61,7 @@ class TaskApplicationController extends Controller
     public function updateStatus(Request $request, $id)
     {
         $request->validate([
-            'status' => 'required|in:applied,accepted,rejected'
+            'status' => 'required|in:applied,accepted,rejected,completed'
         ]);
 
         $application = TaskApplication::findOrFail($id);

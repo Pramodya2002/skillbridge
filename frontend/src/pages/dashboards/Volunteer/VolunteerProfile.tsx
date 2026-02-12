@@ -3,6 +3,15 @@ import { Toast } from "primereact/toast";
 import Select from "react-select";
 import type { MultiValue, ActionMeta } from "react-select";
 
+interface Badge {
+    id: number;
+    name: string;
+    skill: string;
+    icon?: string;
+    earned_at?: string;
+}
+
+
 type OptionType = { value: string; label: string };
 type MultiValueType = OptionType[];
 
@@ -46,14 +55,17 @@ type VolunteerData = {
     availability?: { [day: string]: string[] };
     max_hours_per_week?: number;
     portfolio?: string;
+    company_name?: string;
 };
 
 const VolunteerProfile: React.FC = () => {
     const toast = useRef<Toast>(null);
 
     const [volunteer, setVolunteer] = useState<VolunteerData>({
-        name: "", email: "", skills: [], causes: [], availability: {},
+        name: "", email: "", skills: [], causes: [], availability: {}, company_name: "",
     });
+
+    const [badges, setBadges] = useState<Badge[]>([]);
 
     const [selectedSkills, setSelectedSkills] = useState<MultiValueType>([]);
     const [skillLevels, setSkillLevels] = useState<{ [skill: string]: string }>({});
@@ -82,7 +94,8 @@ const VolunteerProfile: React.FC = () => {
             .then((res) => res.json())
             .then((data) => {
                 const roleData = data.roleData || {};
-                setVolunteer({ ...data.user, ...roleData });
+                setVolunteer({ ...data.user, ...roleData, company_name: roleData.company_name || "", });
+                setBadges(data.badges || []);
                 setSelectedSkills(
                     (roleData.skills || []).map((s: SkillWithLevel) => ({
                         value: s.skill,
@@ -101,7 +114,15 @@ const VolunteerProfile: React.FC = () => {
                     }))
                 );
             })
+
             .catch((err) => console.error("Error fetching profile:", err));
+        if (volunteer.id) {
+            fetch(`http://localhost:8000/api/volunteers/${volunteer.id}/badges`)
+                .then(res => res.json())
+                .then(setBadges)
+                .catch(console.error);
+        }
+
     }, []);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -127,6 +148,7 @@ const VolunteerProfile: React.FC = () => {
             availability: availabilityMode === "weekly" ? volunteer.availability : {},
             max_hours_per_week: availabilityMode === "hours" ? volunteer.max_hours_per_week : null,
             portfolio: volunteer.portfolio,
+            company_name: volunteer.company_name || null,
         };
 
         try {
@@ -233,6 +255,39 @@ const VolunteerProfile: React.FC = () => {
 
             <div className="max-w-6xl mx-auto">
                 <div className="bg-white/70 backdrop-blur-2xl rounded-3xl shadow-2xl border border-white/50 p-8 sm:p-10 md:p-16 overflow-hidden group">
+
+                    <div className="mb-14">
+                        <h2 className="text-3xl sm:text-4xl font-black text-teal-800 text-center mb-8">
+                            🏅 Earned Badges
+                        </h2>
+
+                        {badges.length === 0 ? (
+                            <p className="text-center text-gray-500 italic">
+                                Complete tasks to earn your first badge!
+                            </p>
+                        ) : (
+                            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6">
+                                {badges.map((badge) => (
+                                    <div
+                                        key={badge.id}
+                                        className="bg-gradient-to-br from-teal-100 to-emerald-100 rounded-2xl p-6 text-center shadow-lg border border-teal-200 hover:scale-105 transition-all duration-300"
+                                    >
+                                        <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-teal-600 to-emerald-600 flex items-center justify-center text-white text-3xl shadow-xl">
+                                            <i className={badge.icon || "pi pi-star"}></i>
+                                        </div>
+                                        <p className="font-black text-teal-800 text-lg">
+                                            {badge.name}
+                                        </p>
+                                        {badge.earned_at && (
+                                            <p className="text-xs text-gray-600 mt-2">
+                                                Earned on {new Date(badge.earned_at).toLocaleDateString()}
+                                            </p>
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
                     <div className="absolute inset-0 bg-gradient-to-br from-teal-500/5 to-emerald-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-700 rounded-3xl"></div>
 
                     <div className="relative z-10">
@@ -302,6 +357,20 @@ const VolunteerProfile: React.FC = () => {
                                         />
                                         <label className="absolute left-6 -top-3 px-3 bg-white text-sm font-bold text-teal-700 pointer-events-none transition-all duration-300 peer-focus:-top-3 peer-focus:text-teal-700 peer-focus:text-sm peer-placeholder-shown:top-5 peer-placeholder-shown:text-gray-500 peer-placeholder-shown:text-base sm:peer-placeholder-shown:text-lg">
                                             Portfolio / LinkedIn
+                                        </label>
+                                    </div>
+
+                                    {/* Company Name field */}
+                                    <div className="relative">
+                                        <input
+                                            id="company_name"
+                                            value={volunteer.company_name || ""}
+                                            onChange={handleChange}
+                                            className="peer w-full px-6 py-5 bg-white/90 backdrop-blur-xl border-2 border-gray-300/70 rounded-2xl text-gray-900 font-medium placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-teal-500/40 focus:border-teal-600 transition-all duration-300 text-base sm:text-lg shadow-inner"
+                                            placeholder=" "
+                                        />
+                                        <label className="absolute left-6 -top-3 px-3 bg-white text-sm font-bold text-teal-700 pointer-events-none transition-all duration-300 peer-focus:-top-3 peer-focus:text-teal-700 peer-focus:text-sm peer-placeholder-shown:top-5 peer-placeholder-shown:text-gray-500 peer-placeholder-shown:text-base sm:peer-placeholder-shown:text-lg">
+                                            Company / Organization Name (optional)
                                         </label>
                                     </div>
 

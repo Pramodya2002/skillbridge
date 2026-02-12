@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Task;
+use App\Services\GamificationService;
+use App\Models\Volunteer;
 use Illuminate\Support\Facades\Auth;
 
 class TaskController extends Controller
@@ -113,6 +115,93 @@ class TaskController extends Controller
 
         return response()->json([
             'data' => $tasks
+        ]);
+    }
+
+
+    public function markAsCompleted($taskId)
+    {
+        $user = auth('api')->user();
+
+        if (!$user || $user->role !== 'nonprofit') {
+            return response()->json(['error' => 'Unauthorized'], 401);
+        }
+
+        $task = Task::with('applications.volunteer.user')->findOrFail($taskId);
+
+        if ($task->status !== 'Ongoing') {
+            return response()->json([
+                'error' => 'Only ongoing tasks can be completed'
+            ], 400);
+        }
+
+        $task->status = 'Completed';
+        $task->save();
+
+        foreach ($task->applications as $application) {
+
+            if ($application->status !== 'accepted') {
+                continue;
+            }
+
+            $application->status = 'completed';
+            $application->save();
+
+            $volunteer = $application->volunteer;
+
+            $skills = is_string($task->required_skills)
+                ? json_decode($task->required_skills, true)
+                : $task->required_skills;
+
+            if ($skills) {
+                foreach ($skills as $skill) {
+
+                $skillName = $skill['skill'] ?? '';
+
+                \Illuminate\Support\Facades\Log::info('Trying to award badge for skill', [
+                    'raw_skill'     => $skillName,
+                    'length'        => strlen($skillName),
+                    'hex'           => bin2hex($skillName),
+                    'trimmed'       => trim($skillName),
+                    'first_char_hex'=> substr(bin2hex($skillName), 0, 4), 
+                    'last_char_hex' => substr(bin2hex($skillName), -4), 
+                    'task_id'       => $task->id,
+                    'volunteer_id'  => $volunteer->id ?? 'unknown',
+                    'application_id'=> $application->id ?? 'unknown',
+                ]);
+                    GamificationService::awardBadgeForSkill(
+                        $volunteer,
+                        $skill['skill']
+                    );
+                }
+            }
+        }
+
+        return response()->json([
+            'message' => 'Task and applications marked as completed. Badges awarded.'
+        ]);
+    }
+
+    public function destroy($id)
+    {
+        $user = auth('api')->user();
+
+        if (!$user || $user->role !== 'nonprofit') {
+            return response()->json(['error' => 'Unauthorized'], 401);
+        }
+
+        $task = Task::where('id', $id)
+            ->where('nonprofit_id', $user->id)
+            ->first();
+
+        if (!$task) {
+            return response()->json(['error' => 'Task not found or access denied'], 404);
+        }
+
+        $task->delete();
+
+        return response()->json([
+            'message' => 'Task deleted successfully'
         ]);
     }
 

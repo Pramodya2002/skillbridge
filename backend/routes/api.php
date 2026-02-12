@@ -7,7 +7,7 @@ use App\Http\Controllers\Api\TaskController;
 use App\Http\Controllers\Api\VolunteerController;
 use App\Http\Controllers\Api\TaskApplicationController;
 use App\Http\Controllers\Api\ProfileController;
-
+use App\Http\Controllers\Api\HrController;
 
 
 Route::middleware(\App\Http\Middleware\Cors::class)->group(function () {
@@ -23,6 +23,10 @@ Route::middleware(\App\Http\Middleware\Cors::class)->group(function () {
     Route::get('/tasks/{id}', [App\Http\Controllers\Api\TaskController::class, 'show']);
     Route::post('/tasks/{id}/apply', [App\Http\Controllers\Api\TaskController::class, 'apply']);
 
+    Route::post('/tasks/{task}/complete', [TaskController::class, 'markAsCompleted']);
+
+
+    Route::delete('/tasks/{id}', [TaskController::class, 'destroy']);
 
 
     Route::get('/volunteers/{id}/matched-tasks', [\App\Http\Controllers\Api\MatchingController::class, 'index']);
@@ -43,5 +47,15 @@ Route::middleware(\App\Http\Middleware\Cors::class)->group(function () {
 Route::middleware('auth:api')->group(function () {
     Route::get('/profile', [ProfileController::class, 'show']);
     Route::post('/profile/update', [ProfileController::class, 'update']);
+
+
+    Route::prefix('hr')->group(function () {
+        Route::get('/employees/engagement', [HrController::class, 'getEmployeeEngagement']);
+
+        Route::get('/applications', [HrController::class, 'getAllApplications']);
+       
+    });
 });
+
+
 

@@ -6,7 +6,10 @@ import DashboardLayout from "./components/DashboardLayout";
 import VolunteerDashboardHome from "./pages/dashboards/Volunteer/VolunteerDashboardHome";
 import VolunteerTasks from "./pages/dashboards/Volunteer/VolunteerTasks";
 import VolunteerProfile from "./pages/dashboards/Volunteer/VolunteerProfile";
-import HrDashboard from './pages/dashboards/HrDashboard';
+import HrDashboardLayout from "./components/HrDashboardLayout";
+import HrDashboardHome from "./pages/dashboards/hr/HrDashboardHome";
+import HrProfile from "./pages/dashboards/hr/HrProfile";
+import HrApplicants from "./pages/dashboards/hr/HrApplicants";
 import NonprofitDashboardLayout from "./components/NonprofitDashboardLayout";
 import DashboardHome from "./pages/dashboards/Nonprofit/DashboardHome";
 import NonprofitTasks from "./pages/dashboards/Nonprofit/NonprofitTasks";
@@ -16,12 +19,16 @@ import NonprofitProfile from "./pages/dashboards/Nonprofit/Profile";
 import VolunteerViewTask from './pages/dashboards/Volunteer/VolunteerViewTask';
 import VolunteerAppliedTaskView from "./pages/dashboards/Volunteer/VolunteerAppliedTaskVIew";
 import { Navigate } from 'react-router-dom';
+import ScrollToTop from "./components/ScrollToTop";
+
 
 
 
 function App() {
   return (
     <Router>
+      <ScrollToTop />
+
       <Routes>
         <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={<Login />} />
@@ -46,7 +53,14 @@ function App() {
           <Route path="/dashboard/nonprofit/profile" element={<NonprofitProfile />} />
           <Route path="/dashboard/nonprofit/tasks/:id" element={<NonprofitViewTask />} />
         </Route>
-        <Route path="/dashboard/hr" element={<HrDashboard />} />
+
+        <Route path="/dashboard/hr" element={<HrDashboardLayout />}>
+          <Route index element={<HrDashboardHome />} />
+          <Route path="applicants" element={<HrApplicants />} />
+          <Route path="tasks" element={<div className="p-8 text-2xl">HR Tasks & Management Page (coming soon)</div>} />
+          <Route path="reports" element={<div className="p-8 text-2xl">Reports & Analytics Page (coming soon)</div>} />
+          <Route path="profile" element={<HrProfile />} />
+        </Route>
 
         <Route path="/logout" element={<div>Logging out...</div>} />
 

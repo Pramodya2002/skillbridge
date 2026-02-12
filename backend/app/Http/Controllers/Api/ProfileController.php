@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\Volunteer;
 use App\Models\Nonprofit;
+use App\Models\Hr;
 
 
 class ProfileController extends Controller
@@ -25,6 +26,12 @@ class ProfileController extends Controller
         if ($user->role === 'volunteer') {
             $volunteer = Volunteer::where('user_id', $user->id)->first();
 
+            $badges = $volunteer 
+            ? $volunteer->badges()
+                ->select('badges.id', 'badges.name', 'badges.skill', 'volunteer_badges.awarded_at as earned_at')
+                ->get()
+            : collect();
+
             return response()->json([
                 'user' => [
                     'id' => $user->id,
@@ -37,8 +44,10 @@ class ProfileController extends Controller
                     'causes',
                     'availability',
                     'max_hours_per_week',
-                    'portfolio_url'
+                    'portfolio_url',
+                    'company_name',
                 ]) : new \stdClass(),
+                'badges' => $badges,
             ]);
         }
 
@@ -62,6 +71,26 @@ class ProfileController extends Controller
             ]);
         }
 
+        if ($user->role === 'hr') {
+            $hr = Hr::where('user_id', $user->id)->first();
+
+            return response()->json([
+                'user' => [
+                    'id' => $user->id,
+                    'name' => $user->name,
+                    'email' => $user->email,
+                    'phone' => optional($hr)->phone ?? null,
+                ],
+                'roleData' => $hr ? $hr->only([
+                    'company_name',
+                    'department',
+                    'position',
+                    'company_website',
+                    'employee_count',
+                ]) : new \stdClass(),
+            ]);
+        }
+
         return response()->json(['message' => 'Role not supported'], 400);
     }
 
@@ -73,6 +102,11 @@ class ProfileController extends Controller
             return response()->json(['message' => 'User not found'], 404);
         }
 
+        $commonRules = [
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|max:255|unique:users,email,' . $user->id,
+        ];
+
         if ($user->role === 'volunteer') {
             $validated = $request->validate([
                 'name' => 'required|string|max:255',
@@ -83,6 +117,7 @@ class ProfileController extends Controller
                 'max_hours_per_week' => 'nullable|integer',
                 'portfolio' => 'nullable|string|max:255',
                 'phone' => 'nullable|string|max:20',
+                'company_name' => 'nullable|string|max:255',
             ]);
 
             $user->update([
@@ -99,6 +134,7 @@ class ProfileController extends Controller
                     'availability' => $validated['availability'] ?? [],
                     'max_hours_per_week' => $validated['max_hours_per_week'] ?? null,
                     'portfolio_url' => $validated['portfolio'] ?? null,
+                    'company_name' => $validated['company_name'] ?? null,
                 ]
             );
 
@@ -142,6 +178,39 @@ class ProfileController extends Controller
                 'message' => 'Profile updated successfully',
                 'user' => $user->fresh(),
                 'roleData' => $validated,
+            ]);
+        }
+
+        if ($user->role === 'hr') {
+            $validated = $request->validate(array_merge($commonRules, [
+                'phone' => 'nullable|string|max:20',
+                'company_name' => 'required|string|max:255',
+                'department' => 'required|string|max:255',
+                'position' => 'required|string|max:255',
+                'company_website' => 'nullable|url|max:255',
+                'employee_count' => 'nullable|integer|min:0',
+            ]));
+
+            $user->update([
+                'name' => $validated['name'],
+                'email' => $validated['email'],
+            ]);
+
+            $hr = Hr::updateOrCreate(
+                ['user_id' => $user->id],
+                [
+                    'company_name' => $validated['company_name'],
+                    'department' => $validated['department'],
+                    'position' => $validated['position'],
+                    'company_website' => $validated['company_website'] ?? null,
+                    'employee_count' => $validated['employee_count'] ?? 0,
+                ]
+            );
+
+            return response()->json([
+                'message' => 'Profile updated successfully',
+                'user' => $user->fresh(),
+                'roleData' => $hr->toArray(),
             ]);
         }
 
